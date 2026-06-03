@@ -501,27 +501,39 @@ function defaultData() {
 
 // ── LOGIN ──────────────────────────────────────
 function doLogin() {
-  var name  = (document.getElementById("loginName").value || "").trim();
-  var email = (document.getElementById("loginEmail").value || "").trim();
-  if (!name || !email || email.indexOf("@") < 0) {
-    var err = document.getElementById("loginErr");
-    err.style.display = "block";
-    err.textContent = "Por favor completá tu nombre y un email válido.";
-    return;
+  try {
+    var nameEl  = document.getElementById("loginName");
+    var emailEl = document.getElementById("loginEmail");
+    var errEl   = document.getElementById("loginErr");
+    
+    var name  = nameEl  ? nameEl.value.trim()  : "";
+    var email = emailEl ? emailEl.value.trim() : "";
+    
+    if (!name || !email || email.indexOf("@") < 0) {
+      if (errEl) { errEl.style.display = "block"; errEl.textContent = "Por favor completá tu nombre y un email válido."; }
+      return;
+    }
+    
+    curUser = { name: name, email: email, plan: "Básico" };
+    
+    try {
+      var d = getData();
+      var found = false;
+      for (var i = 0; i < d.users.length; i++) {
+        if (d.users[i].e === email) { found = true; curUser.plan = d.users[i].p || "Básico"; break; }
+      }
+      if (!found) {
+        d.users.push({ n: name, e: email, p: "Básico", s: "ok", q: 0, c: 0 });
+        d.stats.users = (d.stats.users || 0) + 1;
+        saveData(d);
+      }
+    } catch(dataErr) { console.log("Data error (non-fatal):", dataErr); }
+    
+    enterApp();
+  } catch(e) {
+    alert("Error al ingresar: " + e.message);
+    console.error("doLogin error:", e);
   }
-  curUser = { name: name, email: email, plan: "Básico" };
-  // Register user if new
-  var d = getData();
-  var found = false;
-  for (var i = 0; i < d.users.length; i++) {
-    if (d.users[i].e === email) { found = true; curUser.plan = d.users[i].p || "Básico"; break; }
-  }
-  if (!found) {
-    d.users.push({ n: name, e: email, p: "Básico", s: "ok", q: 0, c: 0 });
-    d.stats.users = (d.stats.users || 0) + 1;
-    saveData(d);
-  }
-  enterApp();
 }
 
 function doGoogleLogin() {
@@ -535,16 +547,21 @@ function doGoogleLogin() {
 }
 
 function enterApp() {
-  document.getElementById("loginScreen").classList.add("hidden");
-  var app = document.getElementById("app");
-  app.classList.add("visible");
-  // Update UI with user info
-  document.getElementById("userName").textContent = curUser.name;
-  document.getElementById("userPlan").textContent = "Plan " + curUser.plan;
-  document.getElementById("userAvatar").textContent = curUser.name.charAt(0).toUpperCase();
-  // Load saved theme
-  loadTheme();
-  logAccess(curUser.name, "Login");
+  try {
+    var loginScr = document.getElementById("loginScreen");
+    var app = document.getElementById("app");
+    if (loginScr) loginScr.style.display = "none";
+    if (app) { app.style.display = "flex"; app.style.flexDirection = "column"; app.style.height = "100vh"; }
+    
+    try { document.getElementById("userName").textContent = curUser.name; } catch(e){}
+    try { document.getElementById("userPlan").textContent = "Plan " + curUser.plan; } catch(e){}
+    try { document.getElementById("userAvatar").textContent = curUser.name.charAt(0).toUpperCase(); } catch(e){}
+    try { loadTheme(); } catch(e){}
+    try { logAccess(curUser.name, "Login"); } catch(e){}
+  } catch(e) {
+    alert("Error al entrar: " + e.message);
+    console.error("enterApp error:", e);
+  }
 }
 
 function doLogout() {
