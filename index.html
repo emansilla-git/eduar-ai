@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eduar.ai</title>
+<link rel="icon" type="image/png" href="assets/icon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#EBEBFF; --surface:#ffffff; --surface2:#f0f0ff;
+  --border:#d0d0ee; --accent:#3b6bff; --accent2:#7c3aed;
+  --text:#1a1a3a; --text2:#444468; --text3:#9090bb;
+  --glow:rgba(59,107,255,.08); --sw:260px;
+}
+body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(--text); }
+
+/* ── LOGIN SCREEN ── */
+#loginScreen {
+  position:fixed; inset:0; background:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  z-index:1000; flex-direction:column; gap:0;
+}
+.login-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; padding:40px 36px; width:400px; max-width:94vw;
+  box-shadow:0 8px 40px rgba(59,107,255,.1); text-align:center;
+}
+.login-logo { width:72px; height:72px; object-fit:contain; margin-bottom:16px;
+  filter:drop-shadow(0 0 16px rgba(59,107,255,.4)); }
+.login-title { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:800;
+  background:linear-gradient(135deg,#3b6bff,#7c3aed); -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent; margin-bottom:6px; }
+.login-sub { color:var(--text3); font-size:.85rem; margin-bottom:28px; }
+.login-input {
+  width:100%; padding:12px 16px; border:1.5px solid var(--border);
+  border-radius:10px; font-family:'Space Grotesk',sans-serif; font-size:.9rem;
+  background:var(--surface2); color:var(--text); outline:none; margin-bottom:12px;
+  transition:border .2s;
+}
+.login-input:focus { border-color:var(--accent); }
+.login-btn {
+  width:100%; padding:12px; background:var(--accent); color:#fff; border:none;
+  border-radius:10px; font-family:'Space Grotesk',sans-serif; font-size:.9rem;
+  font-weight:600; cursor:pointer; transition:all .2s; margin-bottom:12px;
+}
+.login-btn:hover { background:#2d5aef; transform:translateY(-1px); }
+.login-btn.google {
+  background:#fff; color:#333; border:1px solid #ddd;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.login-btn.google:hover { background:#f5f5f5; transform:translateY(-1px); }
+.login-divider { display:flex; align-items:center; gap:10px; margin:10px 0; color:var(--text3); font-size:.8rem; }
+.login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.login-err { color:#dc2626; font-size:.8rem; margin-top:6px; display:none; }
+.login-admin-hint { font-size:.72rem; color:var(--text3); margin-top:16px; }
+
+/* ── MAIN APP (hidden until login) ── */
+#app { display:none; height:100vh; flex-direction:column; }
+#app.visible { display:flex; }
+
+/* ── THEME ── */
+body.th-white { --bg:#fff; --surface:#f8f8ff; --surface2:#f0f0f8; --border:#dcdcec; }
+body.th-black { --bg:#08080f; --surface:#101018; --surface2:#181825; --border:#282838; --text:#e4e4f0; --text2:#8888a8; --text3:#484868; }
+body.th-yellow { --bg:#FFFFAA; --surface:#fffff0; --surface2:#ffffd0; --border:#e0e0a0; --text:#2a2a00; --text2:#555520; --text3:#888850; }
+body.th-cyan { --bg:#CCFFFF; --surface:#f0ffff; --surface2:#e0fffe; --border:#a0e0e0; --text:#003333; --text2:#226666; --text3:#559999; }
+
+/* ── TOPBAR ── */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 20px; background:var(--surface); border-bottom:1px solid var(--border);
+  flex-shrink:0; gap:12px;
+}
+.topbar-left { display:flex; align-items:center; gap:10px; }
+.menu-btn { width:34px; height:34px; border:1px solid var(--border); border-radius:8px;
+  background:transparent; cursor:pointer; font-size:1rem; color:var(--text2); transition:all .2s; }
+.menu-btn:hover { background:var(--surface2); color:var(--text); }
+.model-sel {
+  display:flex; align-items:center; gap:8px; padding:7px 13px;
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  cursor:pointer; font-size:.82rem; color:var(--text); transition:border .2s;
+  position:relative; user-select:none;
+}
+.model-sel:hover { border-color:var(--accent); }
+.mdot { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); }
+.topbar-right { display:flex; align-items:center; gap:8px; }
+.theme-strip { display:flex; align-items:center; gap:5px; padding:5px 8px;
+  background:var(--surface2); border:1px solid var(--border); border-radius:9px; }
+.tc { width:18px; height:18px; border-radius:50%; cursor:pointer; border:2px solid transparent;
+  transition:all .2s; flex-shrink:0; }
+.tc:hover,.tc.active { border-color:var(--accent); box-shadow:0 0 0 2px rgba(59,107,255,.25); }
+.tb-btn { height:34px; padding:0 12px; border:1px solid var(--border); border-radius:8px;
+  background:transparent; color:var(--text2); cursor:pointer; font-family:'Space Grotesk',sans-serif;
+  font-size:.78rem; transition:all .2s; display:flex; align-items:center; gap:5px; }
+.tb-btn:hover { background:var(--surface2); color:var(--text); }
+.tb-btn.admin-only { display:none; }
+
+/* ── BODY LAYOUT ── */
+.body-wrap { display:flex; flex:1; overflow:hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width:var(--sw); background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; height:100%; flex-shrink:0;
+  transition:transform .3s; overflow-y:auto;
+}
+.sb-brand { display:flex; align-items:center; gap:10px; padding:16px 14px;
+  border-bottom:1px solid var(--border); cursor:pointer; }
+.sb-logo { width:34px; height:34px; object-fit:contain; filter:drop-shadow(0 0 8px var(--accent)); }
+.sb-name { font-family:'Syne',sans-serif; font-weight:800; font-size:1.2rem;
+  background:linear-gradient(135deg,#3b6bff,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.sb-sub { font-size:.58rem; color:var(--text3); letter-spacing:2px; text-transform:uppercase; }
+.new-btn { margin:12px 10px; padding:10px 14px; background:var(--accent); border:none;
+  border-radius:10px; color:#fff; font-family:'Space Grotesk',sans-serif; font-size:.84rem;
+  font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px; transition:all .2s; }
+.new-btn:hover { background:#2d5aef; transform:translateY(-1px); }
+.sb-sec { padding:8px 12px 3px; font-size:.66rem; color:var(--text3);
+  letter-spacing:1.5px; text-transform:uppercase; font-weight:600; }
+.ci { margin:1px 8px; padding:8px 11px; border-radius:8px; cursor:pointer;
+  font-size:.81rem; color:var(--text2); transition:all .15s; display:flex;
+  align-items:center; gap:8px; }
+.ci:hover { background:var(--surface2); color:var(--text); }
+.ci.active { background:var(--glow); color:var(--accent); border:1px solid rgba(59,107,255,.15); }
+.ci.admin-only { display:none; }
+.sb-bottom { margin-top:auto; border-top:1px solid var(--border); padding:12px; }
+.user-chip { display:flex; align-items:center; gap:9px; padding:8px 10px;
+  border-radius:10px; cursor:pointer; transition:all .2s; }
+.user-chip:hover { background:var(--surface2); }
+.avatar { width:32px; height:32px; border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:700; font-size:.82rem; flex-shrink:0; }
+.sb-links { display:flex; flex-direction:column; gap:1px; margin-bottom:10px; }
+.sb-link { padding:7px 10px; border-radius:8px; font-size:.79rem; color:var(--text2);
+  cursor:pointer; display:flex; align-items:center; gap:8px; transition:all .15s; }
+.sb-link:hover { background:var(--surface2); color:var(--text); }
+.sb-link.admin-only { display:none; }
+
+/* ── CHAT AREA ── */
+.chat-wrap { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.chat-msgs { flex:1; overflow-y:auto; padding:20px; scroll-behavior:smooth; }
+.chat-msgs::-webkit-scrollbar { width:4px; }
+.chat-msgs::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+/* Welcome */
+.welcome { display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-height:60vh; text-align:center; animation:fadeUp .5s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.wlc-logo { width:80px; height:80px; object-fit:contain; margin-bottom:16px;
+  filter:drop-shadow(0 0 20px rgba(59,107,255,.5)); animation:glow 3s ease infinite; }
+@keyframes glow { 0%,100%{filter:drop-shadow(0 0 16px rgba(59,107,255,.45))} 50%{filter:drop-shadow(0 0 28px rgba(59,107,255,.8))} }
+.wlc-title { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; margin-bottom:6px;
+  background:linear-gradient(135deg,var(--text) 30%,#3b6bff 70%,#7c3aed);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.wlc-card { background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:20px 24px; max-width:580px; width:100%; margin-top:16px;
+  box-shadow:0 4px 20px rgba(59,107,255,.07); text-align:left; }
+.wlc-intro { font-size:.88rem; color:var(--text2); margin-bottom:14px; line-height:1.6; }
+.wlc-item { display:flex; align-items:center; gap:12px; padding:8px 10px;
+  border-radius:9px; cursor:pointer; transition:all .2s; font-size:.83rem; color:var(--text2); }
+.wlc-item:hover { background:rgba(59,107,255,.07); color:var(--text); transform:translateX(4px); }
+.wi { font-size:1.1rem; width:24px; text-align:center; flex-shrink:0; }
+
+/* Messages */
+.msg { max-width:700px; margin:0 auto 20px; animation:fadeUp .25s ease; }
+.msg.user { display:flex; justify-content:flex-end; }
+.msg.ai { display:flex; gap:10px; align-items:flex-start; }
+.msg-av { width:30px; height:30px; border-radius:8px; overflow:hidden; flex-shrink:0; }
+.msg-av img { width:100%; height:100%; object-fit:contain; background:var(--surface2); padding:3px; }
+.bubble { padding:11px 15px; border-radius:13px; font-size:.87rem; line-height:1.7; max-width:84%; }
+.msg.user .bubble { background:var(--accent); color:#fff; border-bottom-right-radius:3px; }
+.msg.ai .bubble { background:var(--surface); border:1px solid var(--border); color:var(--text); border-bottom-left-radius:3px; }
+.bubble pre { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:11px; overflow-x:auto; margin:8px 0; font-size:.78rem; font-family:monospace; }
+.bubble code { font-family:monospace; font-size:.79rem; background:rgba(59,107,255,.1); padding:1px 5px; border-radius:4px; }
+.msg-actions { display:flex; gap:5px; margin-top:6px; opacity:0; transition:opacity .2s; }
+.msg:hover .msg-actions { opacity:1; }
+.mab { padding:3px 9px; border-radius:6px; border:1px solid var(--border); background:transparent;
+  color:var(--text3); font-size:.7rem; cursor:pointer; font-family:'Space Grotesk',sans-serif; transition:all .2s; }
+.mab:hover { background:var(--surface2); color:var(--text); }
+.typing { display:flex; gap:4px; padding:12px 15px; align-items:center; }
+.td { width:7px; height:7px; border-radius:50%; background:var(--accent);
+  animation:bounce 1.2s ease infinite; }
+.td:nth-child(2){animation-delay:.2s} .td:nth-child(3){animation-delay:.4s}
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-7px)} }
+
+/* ── INPUT ── */
+.input-area { padding:12px 20px 16px; background:var(--bg); flex-shrink:0; }
+.input-wrap { max-width:700px; margin:0 auto; }
+.ibox { background:var(--surface); border:1.5px solid var(--border); border-radius:15px;
+  padding:12px 14px; display:flex; gap:8px; align-items:flex-end; transition:all .2s; }
+.ibox:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(59,107,255,.09); }
+.ibox textarea { flex:1; background:transparent; border:none; outline:none; color:var(--text);
+  font-family:'Space Grotesk',sans-serif; font-size:.89rem; resize:none; line-height:1.5;
+  max-height:160px; overflow-y:auto; padding-top:2px; }
+.ibox textarea::placeholder { color:var(--text3); }
+.i-actions { display:flex; gap:6px; align-items:center; flex-shrink:0; }
+.i-btn { width:32px; height:32px; border-radius:8px; border:1px solid var(--border);
+  background:transparent; color:var(--text2); cursor:pointer; display:flex;
+  align-items:center; justify-content:center; font-size:.95rem; transition:all .2s; }
+.i-btn:hover { background:var(--surface2); color:var(--text); }
+.send-btn { width:36px; height:36px; border-radius:9px; border:none; background:var(--accent);
+  color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:1rem; transition:all .2s; box-shadow:0 0 12px rgba(59,107,255,.3); }
+.send-btn:hover:not(:disabled) { background:#2d5aef; transform:scale(1.05); }
+.send-btn:disabled { opacity:.4; cursor:not-allowed; }
+.hint-row { display:flex; gap:6px; margin-top:7px; flex-wrap:wrap; }
+.hint { padding:4px 10px; border-radius:20px; border:1px solid var(--border); background:transparent;
+  color:var(--text3); font-size:.71rem; cursor:pointer; font-family:'Space Grotesk',sans-serif; transition:all .2s; }
+.hint:hover { background:var(--surface2); color:var(--text); border-color:var(--accent); }
+
+/* ── ADMIN PANEL ── */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(6px);
+  z-index:200; display:flex; align-items:center; justify-content:center;
+  animation:fadeIn .2s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.admin-panel { background:var(--surface); border:1px solid var(--border); border-radius:18px;
+  width:860px; max-width:96vw; max-height:88vh; overflow:hidden; display:flex;
+  flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.2); animation:slideUp .25s ease; }
+@keyframes slideUp { from{transform:translateY(16px);opacity:0} to{transform:translateY(0);opacity:1} }
+.ap-header { padding:16px 22px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(135deg,rgba(59,107,255,.06),rgba(124,58,237,.06)); }
+.ap-title { font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem;
+  display:flex; align-items:center; gap:10px; }
+.ap-badge { padding:2px 9px; background:var(--accent); border-radius:20px;
+  font-size:.62rem; letter-spacing:1.5px; text-transform:uppercase; color:#fff; }
+.close-btn { width:28px; height:28px; border-radius:7px; border:1px solid var(--border);
+  background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:.88rem; color:var(--text2); transition:all .2s; }
+.close-btn:hover { background:rgba(220,38,38,.1); color:#dc2626; border-color:#dc2626; }
+.ap-tabs { display:flex; border-bottom:1px solid var(--border); padding:0 22px; overflow-x:auto; }
+.ap-tab { padding:10px 16px; font-size:.8rem; font-weight:600; cursor:pointer;
+  border-bottom:2px solid transparent; color:var(--text2); transition:all .2s; white-space:nowrap; }
+.ap-tab:hover { color:var(--text); }
+.ap-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.ap-body { flex:1; overflow-y:auto; padding:20px 22px; }
+.ap-body::-webkit-scrollbar { width:4px; }
+.ap-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+/* Admin body elements */
+.a-sec { margin-bottom:24px; }
+.a-sec h3 { font-size:.72rem; color:var(--text3); letter-spacing:1.5px;
+  text-transform:uppercase; font-weight:600; margin-bottom:12px; }
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.stat-card { background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:13px; }
+.stat-val { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; color:var(--accent); }
+.stat-lbl { font-size:.7rem; color:var(--text3); margin-top:2px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-bottom:11px; }
+.form-row.full { grid-template-columns:1fr; }
+.fg { display:flex; flex-direction:column; gap:5px; }
+.fg label { font-size:.75rem; color:var(--text2); font-weight:500; }
+.fg input,.fg select,.fg textarea { padding:8px 11px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:8px; color:var(--text);
+  font-family:'Space Grotesk',sans-serif; font-size:.83rem; outline:none; transition:border .2s; }
+.fg input:focus,.fg select:focus,.fg textarea:focus { border-color:var(--accent); }
+.fg select option { background:var(--surface2); }
+.a-btn { padding:8px 18px; border-radius:8px; border:none; font-family:'Space Grotesk',sans-serif;
+  font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; }
+.a-btn.p { background:var(--accent); color:#fff; }
+.a-btn.p:hover { background:#2d5aef; transform:translateY(-1px); }
+.a-btn.s { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+.a-btn.s:hover { border-color:var(--accent); }
+.a-btn.d { background:rgba(220,38,38,.08); color:#dc2626; border:1px solid rgba(220,38,38,.18); }
+.brow { display:flex; gap:9px; flex-wrap:wrap; margin-top:12px; }
+.tbl { width:100%; border-collapse:collapse; font-size:.8rem; }
+.tbl th { padding:8px 10px; text-align:left; color:var(--text3); font-size:.68rem;
+  letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid var(--border); }
+.tbl td { padding:9px 10px; border-bottom:1px solid rgba(0,0,0,.04); color:var(--text2); }
+.tbl tr:hover td { background:var(--surface2); }
+.badge { padding:2px 8px; border-radius:20px; font-size:.66rem; font-weight:600; }
+.badge.ok { background:rgba(5,150,105,.1); color:#059669; border:1px solid rgba(5,150,105,.18); }
+.badge.off { background:rgba(0,0,0,.05); color:var(--text3); border:1px solid var(--border); }
+.badge.pro { background:rgba(59,107,255,.1); color:var(--accent); border:1px solid rgba(59,107,255,.18); }
+.badge.vip { background:rgba(245,158,11,.1); color:#d97706; border:1px solid rgba(245,158,11,.18); }
+.inline-form { background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:16px; margin-top:12px; }
+.inline-form h4 { font-size:.8rem; font-weight:600; margin-bottom:12px; color:var(--text); }
+.empty-state { text-align:center; padding:28px; color:var(--text3); font-size:.84rem; }
+.empty-state .icon { font-size:2rem; margin-bottom:8px; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:20px; right:20px; padding:11px 18px;
+  background:var(--surface); border:1px solid var(--accent); border-radius:10px;
+  font-size:.81rem; z-index:999; box-shadow:0 8px 24px rgba(0,0,0,.15);
+  animation:fadeUp .25s ease; color:var(--text); }
+
+.hidden { display:none !important; }
+
+@media(max-width:680px) {
+  .sidebar { position:fixed; left:-260px; top:0; bottom:0; z-index:100; transition:left .3s; }
+  .sidebar.open { left:0; }
+  .stat-grid { grid-template-columns:repeat(2,1fr); }
+  .form-row { grid-template-columns:1fr; }
+  .wlc-card { margin:0 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN SCREEN ══════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <img class="login-logo" src="assets/icon.png" alt="Eduar.ai"/>
+    <div class="login-title">Eduar.ai</div>
+    <div class="login-sub">Inteligencia Artificial para todos</div>
+
+    <input class="login-input" type="text" id="loginName" placeholder="Tu nombre" autocomplete="name"/>
+    <input class="login-input" type="email" id="loginEmail" placeholder="Tu email" autocomplete="email"/>
+    <button class="login-btn" onclick="doLogin()">Ingresar a Eduar.ai</button>
+
+    <div class="login-divider">o</div>
+
+    <button class="login-btn google" onclick="doGoogleLogin()">
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.3 30.2 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.9 6.1C12.6 13 17.9 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17z"/>
+        <path fill="#FBBC05" d="M10.6 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.7 10.7l7.9-6.1z"/>
+        <path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.1 0-11.3-4.1-13.2-9.7l-7.9 6.1C6.7 42.6 14.7 48 24 48z"/>
+      </svg>
+      Continuar con Google
+    </button>
+
+    <div class="login-err" id="loginErr">Por favor completá tu nombre y email.</div>
+    <div class="login-admin-hint">¿Eres administrador? Ingresá normalmente y luego escribí tu clave en el chat.</div>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSB()">☰</button>
+      <div class="model-sel" onclick="toggleModelDrop()" id="modelSel">
+        <div class="mdot"></div>
+        <span id="modelName">Eduar-Pro</span>
+        <span style="color:var(--text3);font-size:.75rem">▾</span>
+        <!-- Model dropdown -->
+        <div id="modelDrop" class="hidden" style="position:absolute;top:42px;left:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:7px;width:280px;z-index:50;box-shadow:0 12px 36px rgba(0,0,0,.15);">
+          <div onclick="selModel('Eduar-Pro')" style="padding:9px 11px;border-radius:8px;cursor:pointer;font-size:.82rem;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"><strong>Eduar-Pro</strong><br><span style="font-size:.72rem;color:var(--text3)">Máximo rendimiento</span></div>
+          <div onclick="selModel('Eduar-Rápido')" style="padding:9px 11px;border-radius:8px;cursor:pointer;font-size:.82rem;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"><strong>Eduar-Rápido</strong><br><span style="font-size:.72rem;color:var(--text3)">Respuestas instantáneas</span></div>
+          <div onclick="selModel('Eduar-Ciencia')" style="padding:9px 11px;border-radius:8px;cursor:pointer;font-size:.82rem;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"><strong>Eduar-Ciencia</strong><br><span style="font-size:.72rem;color:var(--text3)">Análisis científico</span></div>
+          <div onclick="selModel('Eduar-Arte')" style="padding:9px 11px;border-radius:8px;cursor:pointer;font-size:.82rem;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''"><strong>Eduar-Arte</strong><br><span style="font-size:.72rem;color:var(--text3)">Arte, música y creatividad</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <!-- Theme selector -->
+      <div class="theme-strip" title="Color de fondo">
+        <span style="font-size:.68rem;color:var(--text3)">🎨</span>
+        <div class="tc active" style="background:#EBEBFF" onclick="setTheme('',this)" title="Azul Claro"></div>
+        <div class="tc" style="background:#fff;border-color:#ddd" onclick="setTheme('th-white',this)" title="Blanco"></div>
+        <div class="tc" style="background:#08080f" onclick="setTheme('th-black',this)" title="Negro"></div>
+        <div class="tc" style="background:#FFFFAA;border-color:#ccc" onclick="setTheme('th-yellow',this)" title="Amarillo"></div>
+        <div class="tc" style="background:#CCFFFF;border-color:#ccc" onclick="setTheme('th-cyan',this)" title="Cian"></div>
+      </div>
+      <button class="tb-btn admin-only" id="adminBtn" onclick="openAdminPanel()">⚙️ Admin</button>
+      <button class="tb-btn admin-only" id="consoleBtn" onclick="window.open('console.html','_blank')">🖥️ Consola</button>
+      <button class="tb-btn" onclick="doLogout()" style="color:#dc2626;border-color:rgba(220,38,38,.3)">Salir</button>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body-wrap">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-brand" onclick="newChat()">
+        <img class="sb-logo" src="assets/icon.png" alt="Eduar.ai"/>
+        <div>
+          <div class="sb-name">Eduar.ai</div>
+          <div class="sb-sub">Inteligencia Artificial</div>
+        </div>
+      </div>
+      <button class="new-btn" onclick="newChat()">✏️ Nuevo Chat</button>
+      <div class="sb-sec">Recientes</div>
+      <div id="chatHistory"><div class="ci active">💬 Chat actual</div></div>
+      <div class="sb-sec">Explorar</div>
+      <div class="ci" onclick="toast('📁 Mis Proyectos — próximamente')">📁 Mis Proyectos</div>
+      <div class="ci admin-only" id="sbConsole" onclick="window.open('console.html','_blank')">⚡ Eduar Console</div>
+      <div class="ci" onclick="toast('📚 Recursos IA')">📚 Recursos IA</div>
+      <div class="sb-bottom">
+        <div class="sb-links">
+          <div class="sb-link admin-only" id="sbConfig" onclick="openAdminPanel()">⚙️ Configuración (Admin)</div>
+          <div class="sb-link admin-only" id="sbConsole2" onclick="window.open('console.html','_blank')">🖥️ Consola (Admin)</div>
+          <div class="sb-link" onclick="toast('📖 Documentación')">📖 Documentación</div>
+          <div class="sb-link" onclick="toast('❓ Ayuda y soporte')">❓ Ayuda & Soporte</div>
+        </div>
+        <div class="user-chip" id="userChip">
+          <div class="avatar" id="userAvatar">?</div>
+          <div style="flex:1">
+            <div style="font-size:.82rem;font-weight:600" id="userName">Usuario</div>
+            <div style="font-size:.67rem;color:var(--text3)" id="userPlan">Plan Básico</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CHAT -->
+    <div class="chat-wrap">
+      <div class="chat-msgs" id="chatMsgs">
+        <!-- Welcome -->
+        <div class="welcome" id="welcome">
+          <img class="wlc-logo" src="assets/icon.png" alt="Eduar.ai"/>
+          <div class="wlc-title">¿En qué puedo ayudarte?</div>
+          <div class="wlc-card">
+            <div class="wlc-intro">Soy <strong>Eduar.ai</strong>, tu asistente de inteligencia artificial. Exploro e informo los siguientes géneros o categorías:</div>
+            <div class="wlc-item" onclick="qs('Explícame sobre Ciencia y Tecnología: últimos avances e investigaciones')"><span class="wi">🔬</span><strong>Ciencia y Tecnología</strong> — Últimos avances e investigaciones</div>
+            <div class="wlc-item" onclick="qs('Cuéntame sobre Arte Generativo y creación artística con inteligencia artificial')"><span class="wi">🎨</span><strong>Arte Generativo</strong> — Creación artística con IA</div>
+            <div class="wlc-item" onclick="qs('Ayúdame con Música y Composición musical, teoría armónica y creación de piezas')"><span class="wi">🎵</span><strong>Música</strong> — Composición musical y teoría</div>
+            <div class="wlc-item" onclick="qs('Ayúdame con Literatura y Narrativas, quiero crear una obra literaria original')"><span class="wi">✍️</span><strong>Literatura y Narrativas</strong> — Creación de obras literarias</div>
+            <div class="wlc-item" onclick="qs('Actúa como Agente Financiero: analiza y planifica una cartera de inversiones')"><span class="wi">📈</span><strong>Agente Financiero</strong> — Análisis, Planificación y Predicción de mercados</div>
+            <div class="wlc-item" onclick="qs('Actúa como Agente Jurídico: normativas, análisis de contratos y asesoramiento legal')"><span class="wi">⚖️</span><strong>Agente Jurídico</strong> — Normativas, contratos y asesoramiento legal</div>
+            <div class="wlc-item" onclick="qs('Actúa como Agente Industrial: control de calidad en fabricación con IA')"><span class="wi">🏭</span><strong>Agente Industrial</strong> — Control de calidad en fabricación</div>
+            <div class="wlc-item" onclick="qs('Ayúdame con Desarrollo de Sistemas: diseño, arquitectura y programación de software')"><span class="wi">💻</span><strong>Desarrollo de Sistemas</strong> — Diseño y programación de software</div>
+          </div>
+        </div>
+        <div id="messages"></div>
+      </div>
+
+      <!-- INPUT -->
+      <div class="input-area">
+        <div class="input-wrap">
+          <input type="file" id="fileInput" accept=".pdf,.txt,.doc,.docx,.png,.jpg,.jpeg,.csv,.json,.py,.js,.html,.md,.xml" style="display:none" onchange="handleFile(event)"/>
+          <div class="ibox">
+            <textarea id="inp" rows="1" placeholder="Buen día, ¿cómo puedo ayudarte hoy?"
+              oninput="autoResize(this)" onkeydown="onKey(event)"></textarea>
+            <div class="i-actions">
+              <button class="i-btn" title="Adjuntar archivo" onclick="document.getElementById('fileInput').click()">📎</button>
+              <button class="i-btn" title="Búsqueda web" onclick="toast('🌐 Búsqueda web en tiempo real')">🌐</button>
+              <button class="send-btn" id="sendBtn" onclick="sendMsg()">➤</button>
+            </div>
+          </div>
+          <div class="hint-row">
+            <button class="hint" onclick="setHint('Explica detalladamente ')">💡 Explicar</button>
+            <button class="hint" onclick="setHint('Crea un proyecto de ')">🚀 Proyecto</button>
+            <button class="hint" onclick="setHint('Analiza y resume: ')">📊 Analizar</button>
+            <button class="hint" onclick="setHint('Escribe código Python para ')">🐍 Python</button>
+            <button class="hint" onclick="setHint('Escribe código con TensorFlow.js para ')">🧠 TF.js</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ADMIN PANEL ══════════════ -->
+<div class="overlay hidden" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="ap-header">
+      <div class="ap-title">
+        <img src="assets/icon.png" style="width:24px;height:24px;object-fit:contain"/>
+        Panel de Configuración
+        <span class="ap-badge">ADMIN</span>
+      </div>
+      <button class="close-btn" onclick="closeAdminPanel()">✕</button>
+    </div>
+    <div class="ap-tabs" id="apTabs">
+      <div class="ap-tab active" onclick="apTab('stats',this)">📊 Estadísticas</div>
+      <div class="ap-tab" onclick="apTab('users',this)">👥 Usuarios</div>
+      <div class="ap-tab" onclick="apTab('config',this)">⚙️ Configuración</div>
+      <div class="ap-tab" onclick="apTab('costs',this)">💰 Costos</div>
+      <div class="ap-tab" onclick="apTab('models',this)">🤖 Modelos IA</div>
+      <div class="ap-tab" onclick="apTab('security',this)">🔐 Seguridad</div>
+    </div>
+    <div class="ap-body" id="apBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  EDUAR.AI — MAIN SCRIPT
+// ═══════════════════════════════════════════════
+
+var ADMIN_KEY = "1963EduardoAI";
+var API_URL   = "/api/chat";
+var msgs      = [];
+var loading   = false;
+var curModel  = "Eduar-Pro";
+var isAdmin   = false;
+var curUser   = null;
+
+// ── DATA STORE (localStorage) ─────────────────
+function getData() {
+  try { return JSON.parse(localStorage.getItem("eduar_data") || "null") || defaultData(); }
+  catch(e) { return defaultData(); }
+}
+function saveData(d) {
+  try { localStorage.setItem("eduar_data", JSON.stringify(d)); } catch(e) {}
+}
+function defaultData() {
+  return {
+    users: [],
+    config: { sysName:"Eduar.ai", welcome:"Buen día, ¿cómo puedo ayudarte hoy?", apiModel:"claude-haiku-4-5-20251001", maxTokens:1024, adminKey:"1963EduardoAI" },
+    costs:  { perQuery:0.002, freeLimit:50, basic:9.99, pro:29.99, premium:99.99 },
+    stats:  { queries:0, users:0, tokens:0, revenue:0 },
+    log:    []
+  };
+}
+
+// ── LOGIN ──────────────────────────────────────
+function doLogin() {
+  try {
+    var nameEl  = document.getElementById("loginName");
+    var emailEl = document.getElementById("loginEmail");
+    var errEl   = document.getElementById("loginErr");
+    
+    var name  = nameEl  ? nameEl.value.trim()  : "";
+    var email = emailEl ? emailEl.value.trim() : "";
+    
+    if (!name || !email || email.indexOf("@") < 0) {
+      if (errEl) { errEl.style.display = "block"; errEl.textContent = "Por favor completá tu nombre y un email válido."; }
+      return;
+    }
+    
+    curUser = { name: name, email: email, plan: "Básico" };
+    
+    try {
+      var d = getData();
+      var found = false;
+      for (var i = 0; i < d.users.length; i++) {
+        if (d.users[i].e === email) { found = true; curUser.plan = d.users[i].p || "Básico"; break; }
+      }
+      if (!found) {
+        d.users.push({ n: name, e: email, p: "Básico", s: "ok", q: 0, c: 0 });
+        d.stats.users = (d.stats.users || 0) + 1;
+        saveData(d);
+      }
+    } catch(dataErr) { console.log("Data error (non-fatal):", dataErr); }
+    
+    enterApp();
+  } catch(e) {
+    alert("Error al ingresar: " + e.message);
+    console.error("doLogin error:", e);
+  }
+}
+
+function doGoogleLogin() {
+  // Simulate Google login for demo
+  var name = prompt("Ingresá tu nombre completo:");
+  var email = prompt("Ingresá tu email de Google:");
+  if (!name || !email) return;
+  document.getElementById("loginName").value = name;
+  document.getElementById("loginEmail").value = email;
+  doLogin();
+}
+
+function enterApp() {
+  try {
+    var loginScr = document.getElementById("loginScreen");
+    var app = document.getElementById("app");
+    if (loginScr) loginScr.style.display = "none";
+    if (app) { app.style.display = "flex"; app.style.flexDirection = "column"; app.style.height = "100vh"; }
+    
+    try { document.getElementById("userName").textContent = curUser.name; } catch(e){}
+    try { document.getElementById("userPlan").textContent = "Plan " + curUser.plan; } catch(e){}
+    try { document.getElementById("userAvatar").textContent = curUser.name.charAt(0).toUpperCase(); } catch(e){}
+    try { loadTheme(); } catch(e){}
+    try { logAccess(curUser.name, "Login"); } catch(e){}
+  } catch(e) {
+    alert("Error al entrar: " + e.message);
+    console.error("enterApp error:", e);
+  }
+}
+
+function doLogout() {
+  curUser = null; isAdmin = false; msgs = [];
+  document.getElementById("app").classList.remove("visible");
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("loginName").value = "";
+  document.getElementById("loginEmail").value = "";
+  // Hide admin elements
+  showAdminUI(false);
+}
+
+// ── THEME ─────────────────────────────────────
+function setTheme(cls, btn) {
+  var all = ["th-white","th-black","th-yellow","th-cyan"];
+  for (var i = 0; i < all.length; i++) document.body.classList.remove(all[i]);
+  if (cls) document.body.classList.add(cls);
+  var btns = document.querySelectorAll(".tc");
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+  if (btn) btn.classList.add("active");
+  try { localStorage.setItem("eduar_theme", cls || "default"); } catch(e) {}
+}
+function loadTheme() {
+  try {
+    var t = localStorage.getItem("eduar_theme") || "default";
+    var all = ["th-white","th-black","th-yellow","th-cyan"];
+    for (var i = 0; i < all.length; i++) document.body.classList.remove(all[i]);
+    if (t && t !== "default") document.body.classList.add(t);
+    var map = {"default":0,"th-white":1,"th-black":2,"th-yellow":3,"th-cyan":4};
+    var idx = map[t] !== undefined ? map[t] : 0;
+    var btns = document.querySelectorAll(".tc");
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+    if (btns[idx]) btns[idx].classList.add("active");
+  } catch(e) {}
+}
+
+// ── MODEL SELECTOR ────────────────────────────
+function toggleModelDrop() {
+  document.getElementById("modelDrop").classList.toggle("hidden");
+}
+function selModel(name) {
+  curModel = name;
+  document.getElementById("modelName").textContent = name;
+  document.getElementById("modelDrop").classList.add("hidden");
+  toast("🤖 Modelo: " + name);
+}
+document.addEventListener("click", function(e) {
+  if (!e.target.closest("#modelSel")) {
+    var d = document.getElementById("modelDrop");
+    if (d) d.classList.add("hidden");
+  }
+});
+
+// ── SIDEBAR ───────────────────────────────────
+function toggleSB() {
+  document.getElementById("sidebar").classList.toggle("open");
+}
+
+// ── ADMIN MODE ────────────────────────────────
+function showAdminUI(show) {
+  var els = document.querySelectorAll(".admin-only");
+  for (var i = 0; i < els.length; i++) {
+    if (show) els[i].classList.remove("hidden");
+    else      els[i].classList.add("hidden");
+  }
+  isAdmin = show;
+  if (show) {
+    document.getElementById("userPlan").textContent = "Administrador ⭐";
+  }
+}
+
+function checkAdminKey(txt) {
+  var d = getData();
+  var key = (d.config && d.config.adminKey) ? d.config.adminKey : ADMIN_KEY;
+  return txt.trim() === key;
+}
+
+// ── CHAT ──────────────────────────────────────
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 160) + "px";
+}
+function onKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+function setHint(t) {
+  var i = document.getElementById("inp"); i.value = t; i.focus(); autoResize(i);
+}
+function qs(t) { document.getElementById("inp").value = t; sendMsg(); }
+
+function sendMsg() {
+  var inp = document.getElementById("inp");
+  var txt = inp.value.trim();
+  if (!txt || loading) return;
+
+  // Check admin key
+  if (checkAdminKey(txt)) {
+    inp.value = ""; autoResize(inp);
+    showAdminUI(true);
+    openAdminPanel();
+    logAccess(curUser ? curUser.name : "Admin", "Acceso Admin");
+    toast("✅ Bienvenido, Administrador");
+    return;
+  }
+
+  document.getElementById("welcome").classList.add("hidden");
+  inp.value = ""; autoResize(inp);
+  addMsg("user", txt);
+  showTyping();
+  loading = true;
+  document.getElementById("sendBtn").disabled = true;
+
+  // Track query
+  var d = getData();
+  d.stats.queries = (d.stats.queries || 0) + 1;
+  if (curUser) {
+    for (var i = 0; i < d.users.length; i++) {
+      if (d.users[i].e === curUser.email) { d.users[i].q = (d.users[i].q || 0) + 1; break; }
+    }
+  }
+  saveData(d);
+
+  msgs.push({ role:"user", content:txt });
+  callAPI();
+}
+
+function getSystemPrompt() {
+  var prompts = {
+    "Eduar-Pro":     "Eres Eduar.ai, asistente de IA avanzado creado por Eduardo (Córdoba, Argentina). Ayudás a personas en ciencia, tecnología, arte, música, literatura, finanzas y más. Siempre en español, con claridad y calidez.",
+    "Eduar-Rápido":  "Eres Eduar.ai, asistente de IA creado por Eduardo. Respondés en español de forma concisa y directa.",
+    "Eduar-Ciencia": "Eres Eduar.ai en modo científico, creado por Eduardo. Experto en ciencias, tecnología, ingeniería y matemáticas. Respondés en español con rigor técnico.",
+    "Eduar-Arte":    "Eres Eduar.ai en modo creativo, creado por Eduardo. Experto en arte, música, literatura y creatividad. Respondés en español con sensibilidad artística."
+  };
+  return prompts[curModel] || prompts["Eduar-Pro"];
+}
+
+async function callAPI() {
+  try {
+    var res = await fetch(API_URL, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ model:"claude-haiku-4-5-20251001", system:getSystemPrompt(), messages:msgs })
+    });
+    var data = await res.json();
+    removeTyping();
+    if (!res.ok) {
+      addMsg("ai", "⚠️ " + (data.error || "Error de conexión. Verificá la configuración."));
+    } else {
+      var reply = (data.content || []).map(function(b){ return b.text||""; }).join("") || "Sin respuesta.";
+      msgs.push({ role:"assistant", content:reply });
+      addMsg("ai", reply);
+      // Track tokens
+      var d2 = getData();
+      d2.stats.tokens = (d2.stats.tokens || 0) + (data.usage ? data.usage.output_tokens || 0 : 0);
+      saveData(d2);
+    }
+  } catch(e) {
+    removeTyping();
+    addMsg("ai", "⚠️ No se pudo conectar con el servidor. Verificá tu conexión.");
+  }
+  loading = false;
+  document.getElementById("sendBtn").disabled = false;
+}
+
+function addMsg(role, txt) {
+  var c = document.getElementById("messages");
+  var d = document.createElement("div");
+  d.className = "msg " + role;
+  var f = fmtText(txt);
+  if (role === "ai") {
+    d.innerHTML = '<div class="msg-av"><img src="assets/icon.png" alt=""/></div>' +
+      '<div><div class="bubble">' + f + '</div>' +
+      '<div class="msg-actions">' +
+      '<button class="mab" onclick="copyBubble(this)">📋 Copiar</button>' +
+      '<button class="mab" onclick="toast('👍 Valoración registrada')">👍</button>' +
+      '<button class="mab" onclick="toast('👎 Mejoraremos esta respuesta')">👎</button>' +
+      '<button class="mab" onclick="regen()">🔄 Regenerar</button>' +
+      '</div></div>';
+  } else {
+    d.innerHTML = '<div class="bubble">' + escHtml(txt) + '</div>';
+  }
+  c.appendChild(d);
+  document.getElementById("chatMsgs").scrollTop = 99999;
+}
+
+function fmtText(t) {
+  t = escHtml(t);
+  t = t.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  t = t.replace(/^#{1,3} (.+)$/gm, '<strong style="display:block;margin:6px 0 3px">$1</strong>');
+  t = t.replace(/\n/g, '<br>');
+  return t;
+}
+function escHtml(t) { var d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+
+function showTyping() {
+  var c = document.getElementById("messages");
+  var d = document.createElement("div"); d.className = "msg ai"; d.id = "typing";
+  d.innerHTML = '<div class="msg-av"><img src="assets/icon.png" alt=""/></div><div class="bubble"><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>';
+  c.appendChild(d);
+  document.getElementById("chatMsgs").scrollTop = 99999;
+}
+function removeTyping() { var t = document.getElementById("typing"); if(t) t.remove(); }
+function copyBubble(btn) { navigator.clipboard.writeText(btn.closest(".msg").querySelector(".bubble").innerText); toast("📋 Copiado"); }
+function regen() {
+  if (msgs.length >= 1) {
+    var last = msgs[msgs.length-1];
+    if (last.role === "assistant") msgs.pop();
+    var prev = msgs[msgs.length-1];
+    if (prev && prev.role === "user") {
+      showTyping(); loading = true; document.getElementById("sendBtn").disabled = true; callAPI();
+    }
+  }
+}
+
+function newChat() {
+  msgs = [];
+  document.getElementById("messages").innerHTML = "";
+  document.getElementById("welcome").classList.remove("hidden");
+}
+
+// ── FILE ATTACH ───────────────────────────────
+function handleFile(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5*1024*1024) { toast("⚠️ Máximo 5MB por archivo"); return; }
+  toast("📎 Leyendo " + file.name + "...");
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var inp = document.getElementById("inp");
+    var existing = inp.value.trim();
+    var prefix = existing ? existing + "\n\n" : "";
+    if (file.type.startsWith("image/")) {
+      inp.value = prefix + "Analiza la imagen adjunta (" + file.name + ") y describí su contenido detalladamente.";
+    } else {
+      var content = (e.target.result || "").substring(0, 4000);
+      inp.value = prefix + "Analiza el siguiente archivo (" + file.name + "):\n\n" + content + (e.target.result.length > 4000 ? "\n...[contenido truncado]" : "");
+    }
+    autoResize(document.getElementById("inp"));
+    toast("✅ " + file.name + " adjuntado");
+    event.target.value = "";
+  };
+  if (file.type.startsWith("image/")) reader.readAsDataURL(file);
+  else reader.readAsText(file);
+}
+
+// ── ACCESS LOG ───────────────────────────────
+function logAccess(user, action) {
+  try {
+    var d = getData();
+    var now = new Date();
+    d.log = d.log || [];
+    d.log.unshift({
+      date: now.toLocaleDateString("es-AR") + " " + now.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}),
+      user: user, action: action
+    });
+    d.log = d.log.slice(0, 100);
+    saveData(d);
+  } catch(e) {}
+}
+
+// ── ADMIN PANEL ───────────────────────────────
+function openAdminPanel() {
+  document.getElementById("adminOverlay").classList.remove("hidden");
+  apTab("stats", document.querySelector(".ap-tab"));
+}
+function closeAdminPanel() {
+  document.getElementById("adminOverlay").classList.add("hidden");
+}
+
+function apTab(tab, el) {
+  document.querySelectorAll(".ap-tab").forEach(function(t){ t.classList.remove("active"); });
+  if (el) el.classList.add("active");
+  var body = document.getElementById("apBody");
+  var d = getData();
+
+  if (tab === "stats") {
+    var s = d.stats || {};
+    body.innerHTML =
+      '<div class="a-sec"><h3>Resumen General</h3>' +
+      '<div class="stat-grid">' +
+      mkStat(s.queries||0, "Consultas Totales") +
+      mkStat((d.users||[]).length, "Usuarios Registrados") +
+      mkStat("99.97%", "Uptime del Sistema") +
+      mkStat(s.tokens||0, "Tokens Utilizados") +
+      '</div></div>' +
+      '<div class="a-sec"><h3>Registro de Últimas Actividades</h3>' +
+      mkLogTable(d.log || []) +
+      '</div>';
+  }
+  else if (tab === "users") {
+    body.innerHTML =
+      '<div class="a-sec">' +
+      '<div class="brow" style="margin-bottom:14px">' +
+      '<button class="a-btn p" onclick="showInlineForm('newUser')">+ Nuevo Usuario</button>' +
+      '<button class="a-btn s" onclick="exportCSV()">📥 Exportar CSV</button>' +
+      '</div>' +
+      '<div id="inlineFormArea"></div>' +
+      mkUsersTable(d.users || []) +
+      '</div>' +
+      '<div class="a-sec"><h3>Acreditar Créditos</h3>' +
+      '<div class="form-row"><div class="fg"><label>Email del usuario</label><input id="creditEmail" placeholder="email@usuario.com"/></div>' +
+      '<div class="fg"><label>Monto (USD)</label><input type="number" id="creditAmt" placeholder="10.00" min="1"/></div></div>' +
+      '<div class="brow"><button class="a-btn p" onclick="acreditarCreditos()">💳 Acreditar</button></div>' +
+      '</div>';
+  }
+  else if (tab === "config") {
+    var cfg = d.config || {};
+    body.innerHTML =
+      '<div class="a-sec"><h3>Configuración del Sistema</h3>' +
+      '<div class="form-row"><div class="fg"><label>Nombre del Sistema</label><input id="cfgName" value="' + (cfg.sysName||"Eduar.ai") + '"/></div>' +
+      '<div class="fg"><label>Idioma</label><select id="cfgLang"><option>Español</option><option>English</option></select></div></div>' +
+      '<div class="form-row full"><div class="fg"><label>Mensaje de Bienvenida</label><input id="cfgWelcome" value="' + (cfg.welcome||"Buen día, ¿cómo puedo ayudarte hoy?") + '"/></div></div>' +
+      '<div class="form-row"><div class="fg"><label>Modelo API</label><input id="cfgModel" value="' + (cfg.apiModel||"claude-haiku-4-5-20251001") + '"/></div>' +
+      '<div class="fg"><label>Max Tokens</label><input type="number" id="cfgTokens" value="' + (cfg.maxTokens||1024) + '"/></div></div>' +
+      '<div class="brow"><button class="a-btn p" onclick="saveConfig()">💾 Guardar</button><button class="a-btn s" onclick="apTab('config',null)">↺ Restaurar</button></div>' +
+      '</div>';
+  }
+  else if (tab === "costs") {
+    var cs = d.costs || {};
+    body.innerHTML =
+      '<div class="a-sec"><h3>Estructura de Precios</h3>' +
+      '<div class="form-row"><div class="fg"><label>Precio por Consulta (USD)</label><input type="number" step=".001" id="cPQ" value="' + (cs.perQuery||0.002) + '"/></div>' +
+      '<div class="fg"><label>Consultas Gratuitas (nuevo usuario)</label><input type="number" id="cFree" value="' + (cs.freeLimit||50) + '"/></div></div>' +
+      '<div class="form-row"><div class="fg"><label>Plan Básico (USD/mes)</label><input type="number" id="cBasic" value="' + (cs.basic||9.99) + '"/></div>' +
+      '<div class="fg"><label>Plan Pro (USD/mes)</label><input type="number" id="cPro" value="' + (cs.pro||29.99) + '"/></div></div>' +
+      '<div class="form-row full"><div class="fg"><label>Plan Premium (USD/mes)</label><input type="number" id="cPrem" value="' + (cs.premium||99.99) + '"/></div></div>' +
+      '<div class="brow"><button class="a-btn p" onclick="saveCosts()">💾 Actualizar Precios</button></div>' +
+      '</div>' +
+      '<div class="a-sec"><h3>Datos Bancarios</h3>' +
+      '<div style="background:rgba(59,107,255,.06);border:1px solid rgba(59,107,255,.18);border-radius:10px;padding:16px">' +
+      '<div style="font-size:.68rem;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">CUENTA DESTINO PARA CRÉDITOS</div>' +
+      '<div style="font-family:monospace;font-size:1rem;font-weight:700;color:var(--accent)">CBU: 0150887911000001781052</div>' +
+      '<div style="font-size:.82rem;margin-top:6px">ICBC · Titular: <strong>Felipe Eduardo Mansilla</strong> · Alias: <strong>1963Edu14</strong></div>' +
+      '<div style="font-size:.75rem;color:var(--text3);margin-top:4px">Los créditos podrán ser acreditados dentro de las próximas 48hs hábiles.</div>' +
+      '</div></div>';
+  }
+  else if (tab === "models") {
+    var users = d.users || [];
+    var opts = '<option value="">-- Seleccionar usuario --</option>' +
+      users.map(function(u){ return '<option value="'+u.e+'">'+u.n+' ('+u.e+')</option>'; }).join("");
+    var modelDefs = [
+      { name:"Eduar-Rápido",  desc:"Respuestas rápidas",       price:"Gratis",                plans:["Básico","Pro","Premium"] },
+      { name:"Eduar-Arte",    desc:"Arte, música, creatividad", price:"Gratis",                plans:["Básico","Pro","Premium"] },
+      { name:"Eduar-Ciencia", desc:"Análisis científico",       price:"Plan Pro ($29.99/mes)", plans:["Pro","Premium"] },
+      { name:"Eduar-Pro",     desc:"Máximo rendimiento",        price:"Plan Premium ($99.99)", plans:["Premium"] }
+    ];
+    body.innerHTML =
+      '<div class="a-sec"><h3>Gestionar Acceso por Usuario</h3>' +
+      '<div class="form-row full"><div class="fg"><label>Seleccionar Usuario</label>' +
+      '<select id="modelUserSel" onchange="renderUserModelAccess()">' + opts + '</select></div></div>' +
+      '<div id="modelUserArea" style="margin-top:12px"></div></div>' +
+      '<div class="a-sec"><h3>Tabla de Modelos y Accesos</h3>' +
+      modelDefs.map(function(m){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">' +
+          '<div><strong>' + m.name + '</strong><br><span style="font-size:.76rem;color:var(--text3)">' + m.desc + ' · ' + m.price + '</span></div>' +
+          '<span class="badge ok">Activo</span></div>';
+      }).join("") + '</div>';
+  }
+  else if (tab === "security") {
+    var log = d.log || [];
+    body.innerHTML =
+      '<div class="a-sec"><h3>Cambiar Clave de Administrador</h3>' +
+      '<div class="form-row"><div class="fg"><label>Clave Actual</label><input type="password" id="k1" placeholder="Clave actual"/></div>' +
+      '<div class="fg"><label>Nueva Clave</label><input type="password" id="k2" placeholder="Mínimo 8 caracteres"/></div></div>' +
+      '<div class="form-row full"><div class="fg"><label>Confirmar Nueva Clave</label><input type="password" id="k3" placeholder="Repetir nueva clave"/></div></div>' +
+      '<div class="brow"><button class="a-btn p" onclick="changeKey()">🔐 Actualizar Clave</button></div></div>' +
+      '<div class="a-sec"><h3>Registro de Accesos</h3>' +
+      '<div class="brow" style="margin-bottom:10px"><button class="a-btn s" onclick="clearLog()">🗑️ Limpiar registros</button></div>' +
+      mkLogTable(log) + '</div>';
+  }
+}
+
+// Helper: stat card
+function mkStat(val, lbl) {
+  return '<div class="stat-card"><div class="stat-val">' + val + '</div><div class="stat-lbl">' + lbl + '</div></div>';
+}
+
+// Helper: log table
+function mkLogTable(log) {
+  if (!log || log.length === 0) return '<div class="empty-state"><div class="icon">📋</div>Sin registros aún.</div>';
+  return '<table class="tbl"><thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th></tr></thead><tbody>' +
+    log.slice(0,15).map(function(l){ return '<tr><td>'+l.date+'</td><td>'+l.user+'</td><td><span class="badge ok">'+l.action+'</span></td></tr>'; }).join("") +
+    '</tbody></table>';
+}
+
+// Helper: users table
+function mkUsersTable(users) {
+  if (!users || users.length === 0) return '<div class="empty-state"><div class="icon">👤</div>No hay usuarios registrados aún.</div>';
+  return '<table class="tbl"><thead><tr><th>Nombre</th><th>Email</th><th>Plan</th><th>Estado</th><th>Consultas</th><th>Créditos</th><th></th></tr></thead><tbody>' +
+    users.map(function(u, i){
+      return '<tr><td><strong>'+u.n+'</strong></td><td>'+u.e+'</td>' +
+        '<td><span class="badge '+(u.p==="Premium"?"vip":u.p==="Pro"?"pro":"ok")+'">'+u.p+'</span></td>' +
+        '<td><span class="badge '+(u.s==="ok"?"ok":"off")+'">'+(u.s==="ok"?"Activo":"Inactivo")+'</span></td>' +
+        '<td>'+(u.q||0)+'</td><td>$'+(u.c||0)+'</td>' +
+        '<td><button class="a-btn s" style="padding:3px 9px;font-size:.7rem" onclick="showInlineForm('editUser','+i+')">Editar</button></td></tr>';
+    }).join("") + '</tbody></table>';
+}
+
+// Inline forms
+function showInlineForm(type, idx) {
+  var area = document.getElementById("inlineFormArea");
+  if (!area) return;
+  if (type === "newUser") {
+    area.innerHTML = '<div class="inline-form"><h4>Nuevo Usuario</h4>' +
+      '<div class="form-row"><div class="fg"><label>Nombre</label><input id="fuName" placeholder="Nombre Apellido"/></div>' +
+      '<div class="fg"><label>Email</label><input type="email" id="fuEmail" placeholder="email@..."/></div></div>' +
+      '<div class="form-row"><div class="fg"><label>Plan</label><select id="fuPlan"><option>Básico</option><option>Pro</option><option>Premium</option></select></div>' +
+      '<div class="fg"><label>Créditos iniciales</label><input type="number" id="fuCred" value="0" min="0"/></div></div>' +
+      '<div class="brow"><button class="a-btn p" onclick="saveNewUser()">✅ Guardar</button>' +
+      '<button class="a-btn s" onclick="document.getElementById('inlineFormArea').innerHTML=''">Cancelar</button></div></div>';
+  } else if (type === "editUser") {
+    var d = getData(); var u = d.users[idx];
+    area.innerHTML = '<div class="inline-form"><h4>Editar: ' + u.n + '</h4>' +
+      '<div class="form-row"><div class="fg"><label>Nombre</label><input id="euName" value="'+u.n+'"/></div>' +
+      '<div class="fg"><label>Email</label><input type="email" id="euEmail" value="'+u.e+'"/></div></div>' +
+      '<div class="form-row"><div class="fg"><label>Plan</label><select id="euPlan">' +
+      ['Básico','Pro','Premium'].map(function(p){ return '<option'+(p===u.p?' selected':'')+'>'+p+'</option>'; }).join('') +
+      '</select></div>' +
+      '<div class="fg"><label>Estado</label><select id="euStatus">' +
+      '<option value="ok"'+(u.s==="ok"?' selected':'')+'>Activo</option>' +
+      '<option value="off"'+(u.s!=="ok"?' selected':'')+'>Inactivo</option>' +
+      '</select></div></div>' +
+      '<div class="brow"><button class="a-btn p" onclick="saveEditUser('+idx+')">💾 Guardar</button>' +
+      '<button class="a-btn s" onclick="document.getElementById('inlineFormArea').innerHTML=''">Cancelar</button>' +
+      '<button class="a-btn d" onclick="delUser('+idx+')">🗑️ Eliminar</button></div></div>';
+  }
+}
+
+function saveNewUser() {
+  var n = (document.getElementById("fuName")||{}).value||"";
+  var e = (document.getElementById("fuEmail")||{}).value||"";
+  var p = (document.getElementById("fuPlan")||{}).value||"Básico";
+  var c = parseFloat((document.getElementById("fuCred")||{}).value||0);
+  if (!n||!e||e.indexOf("@")<0) { toast("⚠️ Completá nombre y email válido"); return; }
+  var d = getData();
+  d.users.push({n:n,e:e,p:p,s:"ok",q:0,c:c});
+  d.stats.users = (d.stats.users||0)+1;
+  saveData(d);
+  toast("✅ Usuario " + n + " creado");
+  apTab("users", null);
+  document.querySelectorAll(".ap-tab").forEach(function(t,i){ t.classList.toggle("active",i===1); });
+}
+
+function saveEditUser(idx) {
+  var d = getData();
+  d.users[idx].n = document.getElementById("euName").value;
+  d.users[idx].e = document.getElementById("euEmail").value;
+  d.users[idx].p = document.getElementById("euPlan").value;
+  d.users[idx].s = document.getElementById("euStatus").value;
+  saveData(d);
+  toast("✅ Usuario actualizado");
+  apTab("users", null);
+  document.querySelectorAll(".ap-tab").forEach(function(t,i){ t.classList.toggle("active",i===1); });
+}
+
+function delUser(idx) {
+  if (!confirm("¿Eliminar este usuario?")) return;
+  var d = getData(); d.users.splice(idx,1); saveData(d);
+  toast("🗑️ Usuario eliminado");
+  apTab("users", null);
+  document.querySelectorAll(".ap-tab").forEach(function(t,i){ t.classList.toggle("active",i===1); });
+}
+
+function exportCSV() {
+  var d = getData();
+  var csv = "Nombre,Email,Plan,Estado,Consultas,Creditos\n" +
+    (d.users||[]).map(function(u){ return [u.n,u.e,u.p,u.s==="ok"?"Activo":"Inactivo",u.q||0,u.c||0].join(","); }).join("\n");
+  var a = document.createElement("a");
+  a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+  a.download = "eduar-usuarios.csv"; a.click();
+}
+
+function acreditarCreditos() {
+  var email = (document.getElementById("creditEmail")||{}).value||"";
+  var amt   = parseFloat((document.getElementById("creditAmt")||{}).value||0);
+  if (!email||!amt) { toast("⚠️ Completá email y monto"); return; }
+  var d = getData(); var found = false;
+  (d.users||[]).forEach(function(u){ if(u.e===email){ u.c=(u.c||0)+amt; found=true; } });
+  if (!found) { toast("⚠️ Usuario no encontrado: "+email); return; }
+  saveData(d);
+  toast("✅ $"+amt.toFixed(2)+" acreditados a "+email);
+}
+
+function saveConfig() {
+  var d = getData(); d.config = d.config||{};
+  d.config.sysName  = (document.getElementById("cfgName")||{}).value||d.config.sysName;
+  d.config.welcome  = (document.getElementById("cfgWelcome")||{}).value||d.config.welcome;
+  d.config.apiModel = (document.getElementById("cfgModel")||{}).value||d.config.apiModel;
+  d.config.maxTokens= parseInt((document.getElementById("cfgTokens")||{}).value||1024);
+  saveData(d);
+  toast("✅ Configuración guardada correctamente");
+}
+
+function saveCosts() {
+  var d = getData(); d.costs = {
+    perQuery: parseFloat((document.getElementById("cPQ")||{}).value||0.002),
+    freeLimit:parseInt((document.getElementById("cFree")||{}).value||50),
+    basic:    parseFloat((document.getElementById("cBasic")||{}).value||9.99),
+    pro:      parseFloat((document.getElementById("cPro")||{}).value||29.99),
+    premium:  parseFloat((document.getElementById("cPrem")||{}).value||99.99)
+  };
+  saveData(d);
+  toast("✅ Precios actualizados y guardados");
+}
+
+function renderUserModelAccess() {
+  var sel = document.getElementById("modelUserSel");
+  if (!sel||!sel.value) return;
+  var d = getData();
+  var user = null;
+  for (var i = 0; i < d.users.length; i++) { if (d.users[i].e===sel.value) { user=d.users[i]; break; } }
+  if (!user) return;
+  var area = document.getElementById("modelUserArea");
+  var planAccess = { "Básico":["Eduar-Rápido","Eduar-Arte"], "Pro":["Eduar-Rápido","Eduar-Arte","Eduar-Ciencia"], "Premium":["Eduar-Rápido","Eduar-Arte","Eduar-Ciencia","Eduar-Pro"] };
+  var access = planAccess[user.p] || planAccess["Básico"];
+  var all = ["Eduar-Rápido","Eduar-Arte","Eduar-Ciencia","Eduar-Pro"];
+  area.innerHTML = '<div style="margin-bottom:10px;font-size:.84rem"><strong>'+user.n+'</strong> · Plan: <strong>'+user.p+'</strong></div>' +
+    all.map(function(m){
+      var ok = access.indexOf(m) >= 0;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">' +
+        '<span style="font-size:.84rem">'+m+'</span>' +
+        '<div style="display:flex;gap:8px;align-items:center">' +
+        '<span class="badge '+(ok?"ok":"off")+'">'+(ok?"Activo":"Sin acceso")+'</span>' +
+        '<button class="a-btn s" style="padding:4px 10px;font-size:.72rem" onclick="toast(''+(ok?"Desactivado":"Activado")+': '+m+'')">'+  (ok?"Desactivar":"Activar")+'</button>' +
+        '</div></div>';
+    }).join("");
+}
+
+function changeKey() {
+  var d = getData();
+  var cur = (d.config&&d.config.adminKey)||ADMIN_KEY;
+  var k1 = (document.getElementById("k1")||{}).value||"";
+  var k2 = (document.getElementById("k2")||{}).value||"";
+  var k3 = (document.getElementById("k3")||{}).value||"";
+  if (k1!==cur) { toast("⚠️ La clave actual es incorrecta"); return; }
+  if (!k2||k2.length<8) { toast("⚠️ La nueva clave debe tener al menos 8 caracteres"); return; }
+  if (k2!==k3) { toast("⚠️ Las claves nuevas no coinciden"); return; }
+  d.config.adminKey = k2; saveData(d);
+  ADMIN_KEY = k2;
+  toast("🔐 Clave actualizada correctamente");
+  logAccess("Admin (Eduardo)", "Cambio de clave");
+}
+
+function clearLog() {
+  var d = getData(); d.log = []; saveData(d);
+  toast("🗑️ Registro limpiado");
+  apTab("security", null);
+  document.querySelectorAll(".ap-tab").forEach(function(t,i){ t.classList.toggle("active",i===5); });
+}
+
+// ── TOAST ─────────────────────────────────────
+function toast(msg) {
+  var ex = document.querySelector(".toast"); if(ex) ex.remove();
+  var t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.remove(); }, 3000);
+}
+
+// ── KEYBOARD SHORTCUTS ────────────────────────
+document.addEventListener("keydown", function(e) {
+  if (e.key==="Escape") closeAdminPanel();
+});
+</script>
+</body>
+</html>
