@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eduar.ai</title>
+<link rel="icon" href="assets/icon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#EBEBFF;--sur:#fff;--sur2:#f0f0ff;--bor:#d0d0ee;--acc:#3b6bff;--acc2:#7c3aed;--txt:#1a1a3a;--txt2:#444468;--txt3:#9090bb;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);}
+body.th-black{--bg:#08080f;--sur:#101018;--sur2:#181825;--bor:#282838;--txt:#e4e4f0;--txt2:#8888a8;--txt3:#484868;}
+body.th-white{--bg:#fff;--sur:#f8f8ff;--sur2:#f0f0f8;--bor:#dcdcec;}
+body.th-yellow{--bg:#FFFFAA;--sur:#fffff0;--sur2:#ffffd0;--bor:#e0e0a0;--txt:#2a2a00;--txt2:#555520;}
+body.th-cyan{--bg:#CCFFFF;--sur:#f0ffff;--sur2:#e0fffe;--bor:#a0e0e0;--txt:#003333;--txt2:#226666;}
+
+/* LOGIN */
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;}
+.lbox{background:var(--sur);border:1px solid var(--bor);border-radius:20px;padding:36px;width:380px;max-width:94vw;text-align:center;box-shadow:0 8px 40px rgba(59,107,255,.1);}
+.llogo{width:68px;height:68px;object-fit:contain;margin-bottom:14px;filter:drop-shadow(0 0 14px rgba(59,107,255,.4));}
+.ltitle{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#3b6bff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.lsub{color:var(--txt3);font-size:.84rem;margin-bottom:24px;}
+.linput{width:100%;padding:11px 14px;border:1.5px solid var(--bor);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:.88rem;background:var(--sur2);color:var(--txt);outline:none;margin-bottom:10px;transition:border .2s;}
+.linput:focus{border-color:var(--acc);}
+.lbtn{width:100%;padding:11px;background:var(--acc);color:#fff;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:10px;}
+.lbtn:hover{background:#2d5aef;transform:translateY(-1px);}
+.lbtn.google{background:var(--sur);color:#333;border:1px solid var(--bor);display:flex;align-items:center;justify-content:center;gap:9px;}
+.lbtn.google:hover{background:var(--sur2);}
+.ldiv{display:flex;align-items:center;gap:9px;margin:8px 0;color:var(--txt3);font-size:.78rem;}
+.ldiv::before,.ldiv::after{content:'';flex:1;height:1px;background:var(--bor);}
+.lerr{color:#dc2626;font-size:.78rem;margin-top:6px;display:none;}
+.lhint{font-size:.71rem;color:var(--txt3);margin-top:14px;}
+
+/* APP */
+#app{display:none;height:100vh;flex-direction:column;}
+#app.on{display:flex;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;background:var(--sur);border-bottom:1px solid var(--bor);flex-shrink:0;gap:10px;position:relative;}
+.mbtn{width:32px;height:32px;border:1px solid var(--bor);border-radius:8px;background:transparent;cursor:pointer;font-size:.95rem;color:var(--txt2);transition:all .2s;}
+.mbtn:hover{background:var(--sur2);}
+.msel{display:flex;align-items:center;gap:7px;padding:6px 12px;background:var(--sur2);border:1px solid var(--bor);border-radius:9px;cursor:pointer;font-size:.81rem;position:relative;}
+.msel:hover{border-color:var(--acc);}
+.mdot{width:6px;height:6px;border-radius:50%;background:var(--acc);box-shadow:0 0 5px var(--acc);}
+.mdrop{position:absolute;top:38px;left:0;background:var(--sur);border:1px solid var(--bor);border-radius:11px;padding:6px;width:260px;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.12);display:none;}
+.mdrop.open{display:block;}
+.mopt{padding:8px 11px;border-radius:8px;cursor:pointer;font-size:.81rem;}
+.mopt:hover{background:var(--sur2);}
+.mopt strong{display:block;}
+.mopt span{font-size:.7rem;color:var(--txt3);}
+.tbr{display:flex;align-items:center;gap:7px;}
+.tbar-themes{display:flex;align-items:center;gap:4px;padding:4px 8px;background:var(--sur2);border:1px solid var(--bor);border-radius:8px;}
+.tc{width:17px;height:17px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;}
+.tc:hover,.tc.active{border-color:var(--acc);box-shadow:0 0 0 2px rgba(59,107,255,.25);}
+.tbtn{height:30px;padding:0 11px;border:1px solid var(--bor);border-radius:7px;background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:.75rem;cursor:pointer;transition:all .2s;}
+.tbtn:hover{background:var(--sur2);color:var(--txt);}
+.adm{display:none;}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+.sb{width:255px;background:var(--sur);border-right:1px solid var(--bor);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;transition:transform .3s;}
+.sb-brand{display:flex;align-items:center;gap:9px;padding:14px 13px;border-bottom:1px solid var(--bor);cursor:pointer;}
+.sb-logo{width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 0 7px var(--acc));}
+.sb-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#3b6bff,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sb-sub{font-size:.56rem;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;}
+.new-btn{margin:11px 9px;padding:9px 13px;background:var(--acc);border:none;border-radius:9px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;}
+.new-btn:hover{background:#2d5aef;transform:translateY(-1px);}
+.sb-sec{padding:7px 11px 2px;font-size:.63rem;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
+.ci{margin:1px 7px;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:.8rem;color:var(--txt2);transition:all .15s;display:flex;align-items:center;gap:7px;}
+.ci:hover{background:var(--sur2);color:var(--txt);}
+.sb-bot{margin-top:auto;border-top:1px solid var(--bor);padding:11px;}
+.sb-link{padding:6px 9px;border-radius:7px;font-size:.78rem;color:var(--txt2);cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s;margin-bottom:1px;}
+.sb-link:hover{background:var(--sur2);color:var(--txt);}
+.uchip{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:9px;cursor:pointer;margin-top:8px;}
+.uchip:hover{background:var(--sur2);}
+.uav{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0;}
+
+/* CHAT */
+.chat{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.msgs{flex:1;overflow-y:auto;padding:18px;}
+.msgs::-webkit-scrollbar{width:4px;}
+.msgs::-webkit-scrollbar-thumb{background:var(--bor);border-radius:4px;}
+
+/* WELCOME */
+.wlc{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;animation:fu .5s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wlc-logo{width:74px;height:74px;object-fit:contain;margin-bottom:14px;filter:drop-shadow(0 0 18px rgba(59,107,255,.5));animation:glow 3s ease infinite;}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 14px rgba(59,107,255,.45))}50%{filter:drop-shadow(0 0 26px rgba(59,107,255,.8))}}
+.wlc-title{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,var(--txt) 30%,#3b6bff 70%,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.wlc-card{background:var(--sur);border:1px solid var(--bor);border-radius:14px;padding:18px 22px;max-width:560px;width:100%;margin-top:14px;box-shadow:0 4px 18px rgba(59,107,255,.06);text-align:left;}
+.wlc-intro{font-size:.86rem;color:var(--txt2);margin-bottom:12px;line-height:1.6;}
+.wi{display:flex;align-items:center;gap:11px;padding:7px 9px;border-radius:8px;cursor:pointer;transition:all .2s;font-size:.82rem;color:var(--txt2);}
+.wi:hover{background:rgba(59,107,255,.07);color:var(--txt);transform:translateX(3px);}
+.wi-icon{font-size:1rem;width:22px;text-align:center;flex-shrink:0;}
+
+/* MESSAGES */
+.msg{max-width:680px;margin:0 auto 18px;animation:fu .25s ease;}
+.msg.user{display:flex;justify-content:flex-end;}
+.msg.ai{display:flex;gap:9px;align-items:flex-start;}
+.msg-av{width:28px;height:28px;border-radius:7px;overflow:hidden;flex-shrink:0;}
+.msg-av img{width:100%;height:100%;object-fit:contain;background:var(--sur2);padding:3px;}
+.bubble{padding:10px 14px;border-radius:12px;font-size:.86rem;line-height:1.7;max-width:85%;}
+.msg.user .bubble{background:var(--acc);color:#fff;border-bottom-right-radius:3px;}
+.msg.ai .bubble{background:var(--sur);border:1px solid var(--bor);color:var(--txt);border-bottom-left-radius:3px;}
+.bubble pre{background:var(--bg);border:1px solid var(--bor);border-radius:7px;padding:10px;overflow-x:auto;margin:7px 0;font-size:.77rem;font-family:monospace;}
+.bubble code{font-family:monospace;font-size:.78rem;background:rgba(59,107,255,.1);padding:1px 5px;border-radius:4px;}
+.macts{display:flex;gap:4px;margin-top:5px;opacity:0;transition:opacity .2s;}
+.msg:hover .macts{opacity:1;}
+.mab{padding:2px 8px;border-radius:5px;border:1px solid var(--bor);background:transparent;color:var(--txt3);font-size:.69rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
+.mab:hover{background:var(--sur2);color:var(--txt);}
+.typing{display:flex;gap:4px;padding:10px 14px;align-items:center;}
+.td{width:6px;height:6px;border-radius:50%;background:var(--acc);animation:b 1.2s ease infinite;}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes b{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+/* INPUT */
+.inp-area{padding:11px 18px 15px;background:var(--bg);flex-shrink:0;}
+.inp-wrap{max-width:680px;margin:0 auto;}
+.ibox{background:var(--sur);border:1.5px solid var(--bor);border-radius:14px;padding:11px 13px;display:flex;gap:7px;align-items:flex-end;transition:all .2s;}
+.ibox:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(59,107,255,.08);}
+.ibox textarea{flex:1;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.88rem;resize:none;line-height:1.5;max-height:150px;overflow-y:auto;}
+.ibox textarea::placeholder{color:var(--txt3);}
+.ibtn{width:30px;height:30px;border-radius:7px;border:1px solid var(--bor);background:transparent;color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;flex-shrink:0;}
+.ibtn:hover{background:var(--sur2);}
+.sbtn{width:34px;height:34px;border-radius:8px;border:none;background:var(--acc);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:all .2s;flex-shrink:0;}
+.sbtn:hover:not(:disabled){background:#2d5aef;transform:scale(1.05);}
+.sbtn:disabled{opacity:.4;cursor:not-allowed;}
+.hints{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.hint{padding:3px 9px;border-radius:18px;border:1px solid var(--bor);background:transparent;color:var(--txt3);font-size:.7rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all .2s;}
+.hint:hover{background:var(--sur2);color:var(--txt);border-color:var(--acc);}
+
+/* ADMIN PANEL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);z-index:200;display:flex;align-items:center;justify-content:center;animation:fi .2s;}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.apanel{background:var(--sur);border:1px solid var(--bor);border-radius:16px;width:820px;max-width:96vw;max-height:87vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(0,0,0,.18);animation:su .22s ease;}
+@keyframes su{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.ap-hdr{padding:15px 20px;border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(59,107,255,.05),rgba(124,58,237,.05));}
+.ap-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;display:flex;align-items:center;gap:9px;}
+.badge-admin{padding:2px 8px;background:var(--acc);border-radius:18px;font-size:.61rem;letter-spacing:1.5px;text-transform:uppercase;color:#fff;}
+.xbtn{width:26px;height:26px;border-radius:6px;border:1px solid var(--bor);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--txt2);}
+.xbtn:hover{background:rgba(220,38,38,.1);color:#dc2626;border-color:#dc2626;}
+.ap-tabs{display:flex;border-bottom:1px solid var(--bor);padding:0 20px;overflow-x:auto;}
+.apt{padding:9px 14px;font-size:.78rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--txt2);white-space:nowrap;}
+.apt:hover{color:var(--txt);}
+.apt.on{color:var(--acc);border-bottom-color:var(--acc);}
+.ap-body{flex:1;overflow-y:auto;padding:18px 20px;}
+.ap-body::-webkit-scrollbar{width:4px;}
+.ap-body::-webkit-scrollbar-thumb{background:var(--bor);border-radius:4px;}
+.asec{margin-bottom:22px;}
+.asec h3{font-size:.7rem;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:11px;}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.sc{background:var(--sur2);border:1px solid var(--bor);border-radius:9px;padding:12px;}
+.sv{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;color:var(--acc);}
+.sl{font-size:.68rem;color:var(--txt3);margin-top:2px;}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.fg label{font-size:.73rem;color:var(--txt2);font-weight:500;}
+.fg input,.fg select,.fg textarea{padding:7px 10px;background:var(--sur2);border:1px solid var(--bor);border-radius:7px;color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.81rem;outline:none;transition:border .2s;}
+.fg input:focus,.fg select:focus{border-color:var(--acc);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.frow.full{grid-template-columns:1fr;}
+.abtn{padding:7px 16px;border-radius:7px;border:none;font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.abtn.p{background:var(--acc);color:#fff;}
+.abtn.p:hover{background:#2d5aef;}
+.abtn.s{background:var(--sur2);color:var(--txt);border:1px solid var(--bor);}
+.abtn.s:hover{border-color:var(--acc);}
+.abtn.d{background:rgba(220,38,38,.08);color:#dc2626;border:1px solid rgba(220,38,38,.18);}
+.brow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.tbl{width:100%;border-collapse:collapse;font-size:.79rem;}
+.tbl th{padding:7px 10px;text-align:left;color:var(--txt3);font-size:.66rem;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--bor);}
+.tbl td{padding:8px 10px;border-bottom:1px solid rgba(0,0,0,.04);color:var(--txt2);}
+.tbl tr:hover td{background:var(--sur2);}
+.bdg{padding:2px 7px;border-radius:18px;font-size:.64rem;font-weight:600;}
+.bdg.ok{background:rgba(5,150,105,.1);color:#059669;border:1px solid rgba(5,150,105,.18);}
+.bdg.off{background:rgba(0,0,0,.05);color:var(--txt3);border:1px solid var(--bor);}
+.bdg.pro{background:rgba(59,107,255,.1);color:var(--acc);border:1px solid rgba(59,107,255,.18);}
+.bdg.vip{background:rgba(245,158,11,.1);color:#d97706;border:1px solid rgba(245,158,11,.18);}
+.iform{background:var(--sur2);border:1px solid var(--bor);border-radius:9px;padding:14px;margin:10px 0;}
+.iform h4{font-size:.78rem;font-weight:600;margin-bottom:10px;}
+.empty{text-align:center;padding:24px;color:var(--txt3);font-size:.82rem;}
+.toast{position:fixed;bottom:18px;right:18px;padding:10px 16px;background:var(--sur);border:1px solid var(--acc);border-radius:9px;font-size:.79rem;z-index:999;box-shadow:0 6px 20px rgba(0,0,0,.12);animation:fu .22s ease;color:var(--txt);}
+.hidden{display:none!important;}
+@media(max-width:640px){.sb{position:fixed;left:-255px;top:0;bottom:0;z-index:100;transition:left .3s;}.sb.open{left:0;}.sgrid{grid-template-columns:repeat(2,1fr);}.frow{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+
+<!-- UPGRADE PLAN MODAL -->
+<div class="overlay hidden" id="upgradeOverlay">
+  <div style="background:#e0f5f0;border-radius:18px;width:680px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);animation:su .25s ease;">
+
+    <!-- Header -->
+    <div style="padding:20px 24px 14px;border-bottom:1px solid rgba(0,100,80,.15);display:flex;align-items:center;justify-content:space-between;background:rgba(0,150,120,.07);border-radius:18px 18px 0 0;position:sticky;top:0;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:#005040">Mejorar mi Plan</div>
+        <div style="font-size:.8rem;color:#007060;margin-top:2px">Elegí el plan y realizá la transferencia para activarlo</div>
+      </div>
+      <button id="upgradeClose" style="width:28px;height:28px;border-radius:7px;border:1px solid rgba(0,100,80,.2);background:transparent;cursor:pointer;font-size:.88rem;color:#005040;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Plan Pro -->
+      <div id="upg-pro-card" style="background:#fff;border:2px solid #10b981;border-radius:14px;padding:16px 18px;cursor:pointer;transition:all .2s;" onclick="selectUpgradePlan('pro')">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <svg width="56" height="56" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" fill="#f0fdf9" stroke="#10b981" stroke-width="3"/>
+            <line x1="20" y1="65" x2="80" y2="65" stroke="#d1fae5" stroke-width="2"/>
+            <line x1="50" y1="20" x2="50" y2="65" stroke="#d1fae5" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="80" y1="40" x2="50" y2="65" stroke="#d1fae5" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="20" y1="40" x2="50" y2="65" stroke="#d1fae5" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="50" y1="65" x2="50" y2="25" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="65" r="5" fill="#10b981"/>
+            <text x="50" y="85" text-anchor="middle" font-size="13" font-weight="bold" fill="#10b981" font-family="sans-serif">IA</text>
+          </svg>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#065f46">Plan Pro</div>
+              <div id="upg-pro-check" style="display:none;width:24px;height:24px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem">✓</div>
+            </div>
+            <div style="font-size:.82rem;color:#374151;display:flex;flex-direction:column;gap:3px">
+              <div>✓ Respuestas rápidas sin límite</div>
+              <div>✓ Arte y creatividad</div>
+              <div>✓ Análisis Técnico/Científico</div>
+              <div>✓ Sin límite de consultas por día</div>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#065f46">U$D 19,99</div>
+            <div style="font-size:.72rem;color:#6b7280">/mes</div>
+            <div style="font-size:.72rem;color:#10b981;margin-top:2px">U$D 250/año</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan Premium -->
+      <div id="upg-premium-card" style="background:#fff;border:2px solid #3b6bff;border-radius:14px;padding:16px 18px;cursor:pointer;transition:all .2s;" onclick="selectUpgradePlan('premium')">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <svg width="56" height="56" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" fill="#eff6ff" stroke="#3b6bff" stroke-width="3"/>
+            <line x1="20" y1="65" x2="80" y2="65" stroke="#dbeafe" stroke-width="2"/>
+            <line x1="50" y1="20" x2="50" y2="65" stroke="#dbeafe" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="80" y1="40" x2="50" y2="65" stroke="#dbeafe" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="20" y1="40" x2="50" y2="65" stroke="#dbeafe" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="50" y1="65" x2="28" y2="35" stroke="#3b6bff" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="65" r="5" fill="#3b6bff"/>
+            <text x="50" y="85" text-anchor="middle" font-size="13" font-weight="bold" fill="#3b6bff" font-family="sans-serif">IA</text>
+          </svg>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#1e3a8a">Plan Premium</div>
+              <div id="upg-premium-check" style="display:none;width:24px;height:24px;border-radius:50%;background:#3b6bff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem">✓</div>
+            </div>
+            <div style="font-size:.82rem;color:#374151;display:flex;flex-direction:column;gap:3px">
+              <div>✓ Máximo Rendimiento</div>
+              <div>✓ Arte, creatividad y análisis científico</div>
+              <div>✓ Programación (Python, Java, JS, TensorFlow…)</div>
+              <div>✓ Desarrollo de Sistemas completos</div>
+              <div>✓ Sin límite de consultas por día</div>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#1e3a8a">U$D 99,99</div>
+            <div style="font-size:.72rem;color:#6b7280">/mes</div>
+            <div style="font-size:.72rem;color:#3b6bff;margin-top:2px">U$D 1.000/año</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment section (shown after plan selection) -->
+      <div id="upg-payment" style="display:none;background:#fff;border:1.5px solid rgba(0,100,80,.2);border-radius:14px;padding:18px 20px;">
+        <div style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:#005040;margin-bottom:14px">💳 Datos para la transferencia</div>
+
+        <div style="background:rgba(59,107,255,.05);border:1px solid rgba(59,107,255,.15);border-radius:10px;padding:14px;margin-bottom:14px">
+          <div style="font-size:.66rem;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">CUENTA DESTINO</div>
+          <div style="font-family:monospace;font-size:1rem;font-weight:700;color:#3b6bff;letter-spacing:1px">CBU: 0150887911000001781052</div>
+          <div style="font-size:.8rem;margin-top:5px;color:#374151">ICBC · <strong>Felipe Eduardo Mansilla</strong> · Alias: <strong>1963Edu14</strong></div>
+        </div>
+
+        <div style="background:#f0fdf9;border:1px solid #a7f3d0;border-radius:10px;padding:12px;margin-bottom:14px">
+          <div style="font-size:.75rem;color:#065f46;font-weight:600;margin-bottom:4px">Monto a transferir:</div>
+          <div id="upg-amount" style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#065f46">U$D 19,99/mes</div>
+          <div style="font-size:.72rem;color:#6b7280;margin-top:3px">Una vez confirmada la transferencia, tu plan se activará en 24-48hs hábiles.</div>
+        </div>
+
+        <!-- Upload comprobante -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:.78rem;font-weight:600;color:#374151;margin-bottom:7px">Subir comprobante de transferencia:</div>
+          <div id="upg-upload-area" style="border:2px dashed #a7f3d0;border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:#f0fdf9;" onclick="document.getElementById('upg-file-input').click()">
+            <input type="file" id="upg-file-input" accept="image/*,.pdf" style="display:none"/>
+            <div style="font-size:1.4rem;margin-bottom:5px">📎</div>
+            <div style="font-size:.82rem;color:#065f46;font-weight:600">Click para adjuntar comprobante</div>
+            <div style="font-size:.73rem;color:#6b7280;margin-top:3px">PDF, JPG o PNG</div>
+          </div>
+          <div id="upg-file-name" style="display:none;font-size:.78rem;color:#10b981;margin-top:6px;font-weight:600"></div>
+        </div>
+
+        <!-- Name and email confirmation -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div>
+            <label style="font-size:.74rem;color:#6b7280;font-weight:500;display:block;margin-bottom:4px">Tu nombre</label>
+            <input id="upg-name" style="width:100%;padding:8px 10px;border:1px solid #d1fae5;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.82rem;outline:none;background:#f0fdf9;" placeholder="Nombre completo"/>
+          </div>
+          <div>
+            <label style="font-size:.74rem;color:#6b7280;font-weight:500;display:block;margin-bottom:4px">Tu email</label>
+            <input id="upg-email" style="width:100%;padding:8px 10px;border:1px solid #d1fae5;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.82rem;outline:none;background:#f0fdf9;" placeholder="email@..."/>
+          </div>
+        </div>
+
+        <button id="upg-confirm-btn" style="width:100%;padding:11px;background:linear-gradient(135deg,#10b981,#3b6bff);color:#fff;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;">
+          ✅ Confirmar y enviar solicitud
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lbox">
+    <img class="llogo" src="assets/icon.png" alt="Eduar.ai"/>
+    <div class="ltitle">Eduar.ai</div>
+    <div class="lsub">Inteligencia Artificial para todos</div>
+    <input class="linput" type="text" id="lname" placeholder="Tu nombre"/>
+    <input class="linput" type="email" id="lemail" placeholder="Tu email"/>
+    <button class="lbtn" id="loginBtn">Ingresar a Eduar.ai</button>
+    <div class="ldiv">o</div>
+    <button class="lbtn google" id="googleBtn">
+      <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.3 30.2 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.9 6.1C12.6 13 17.9 9.5 24 9.5z"/><path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.2-10.1 7.2-17z"/><path fill="#FBBC05" d="M10.6 28.6A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.1 0-11.3-4.1-13.2-9.7l-7.9 6.1C6.7 42.6 14.7 48 24 48z"/></svg>
+      Continuar con Google
+    </button>
+    <div class="lerr" id="lerr">Completá tu nombre y un email válido.</div>
+    <div class="lhint">¿Administrador? Ingresá y escribí tu clave en el chat.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:9px">
+      <button class="mbtn" id="menuBtn">☰</button>
+      <div class="msel" id="msel">
+        <div class="mdot"></div>
+        <span id="mname">Plan Básico</span>
+        <span style="color:var(--txt3);font-size:.73rem">▾</span>
+        <div class="mdrop" id="mdrop">
+          <div class="mopt" data-m="basico"><strong>Plan Básico</strong><span>Gratis limitado</span></div>
+          <div class="mopt" data-m="pro"><strong>Plan Pro</strong><span>Arte, Tecnología y Ciencia</span></div>
+          <div class="mopt" data-m="premium"><strong>Plan Premium</strong><span>Máximo Rendimiento</span></div>
+          <div class="mopt" data-m="ver" style="border-top:1px solid var(--bor);margin-top:5px;padding-top:8px;color:var(--acc)"><strong>Ver características de todos los planes ›</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="tbr">
+      <div class="tbar-themes">
+        <span style="font-size:.65rem;color:var(--txt3)">🎨</span>
+        <div class="tc active" style="background:#EBEBFF" data-t="" title="Azul"></div>
+        <div class="tc" style="background:#fff;border-color:#ddd" data-t="th-white" title="Blanco"></div>
+        <div class="tc" style="background:#08080f" data-t="th-black" title="Negro"></div>
+        <div class="tc" style="background:#FFFFAA;border-color:#ccc" data-t="th-yellow" title="Amarillo"></div>
+        <div class="tc" style="background:#CCFFFF;border-color:#ccc" data-t="th-cyan" title="Cian"></div>
+      </div>
+      <button class="tbtn adm" id="adminBtn">⚙️ Admin</button>
+      <button class="tbtn adm" id="consoleBtn">🖥️ Consola</button>
+      <button class="tbtn" id="logoutBtn">Salir</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sb" id="sb">
+      <div class="sb-brand" id="sbBrand">
+        <img class="sb-logo" src="assets/icon.png" alt="Eduar.ai"/>
+        <div><div class="sb-name">Eduar.ai</div><div class="sb-sub">Inteligencia Artificial</div></div>
+      </div>
+      <button class="new-btn" id="newBtn">✏️ Nuevo Chat</button>
+      <div class="sb-sec">Recientes</div>
+      <div class="ci">💬 Chat actual</div>
+      <div class="sb-sec">Explorar</div>
+      <div class="ci" data-msg="Proyectos — próximamente">📁 Mis Proyectos</div>
+      <div class="ci adm" id="sbConsole">⚡ Eduar Console</div>
+      <div class="ci" data-msg="Recursos IA">📚 Recursos IA</div>
+      <div class="sb-bot">
+        <div class="sb-link adm" id="sbAdmin">⚙️ Configuración (Admin)</div>
+        <div class="sb-link adm" id="sbConsole2">🖥️ Consola (Admin)</div>
+        <div class="sb-link" data-msg="Documentación">📖 Documentación</div>
+        <div class="sb-link" data-msg="Ayuda y soporte">❓ Ayuda</div>
+        <button id="upgradePlanBtn" style="width:100%;margin-bottom:8px;padding:9px;background:linear-gradient(135deg,#10b981,#3b6bff);color:#fff;border:none;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;">⭐ Mejorar mi Plan</button>
+        <div class="uchip">
+          <div class="uav" id="uav">?</div>
+          <div><div style="font-size:.8rem;font-weight:600" id="uname2">Usuario</div><div style="font-size:.65rem;color:var(--txt3)" id="uplan2">Plan Básico</div></div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="chat">
+      <div class="msgs" id="msgs">
+        <div class="wlc" id="wlc">
+          <img class="wlc-logo" src="assets/icon.png" alt="Eduar.ai"/>
+          <div class="wlc-title">¿En qué puedo ayudarte?</div>
+          <div class="wlc-card">
+            <div class="wlc-intro">Soy <strong>Eduar.ai</strong>, tu asistente de inteligencia artificial. Puedo responder preguntas, generar imágenes con IA y explorar los siguientes géneros o categorías:</div>
+            <div class="wi" data-q="Explícame sobre Ciencia y Tecnología: últimos avances e investigaciones"><span class="wi-icon">🔬</span><strong>Ciencia y Tecnología</strong> — Últimos avances e investigaciones</div>
+            <div class="wi" data-q="Cuéntame sobre Arte Generativo y creación artística con inteligencia artificial"><span class="wi-icon">🎨</span><strong>Arte Generativo</strong> — Creación artística con IA</div>
+            <div class="wi" data-q="Ayúdame con Música y Composición musical, teoría armónica y creación de piezas"><span class="wi-icon">🎵</span><strong>Música</strong> — Composición musical y teoría</div>
+            <div class="wi" data-q="Ayúdame con Literatura y Narrativas, quiero crear una obra literaria original"><span class="wi-icon">✍️</span><strong>Literatura y Narrativas</strong> — Creación de obras literarias</div>
+            <div class="wi" data-q="Actúa como Agente Financiero: analiza y planifica una cartera de inversiones"><span class="wi-icon">📈</span><strong>Agente Financiero</strong> — Análisis, Planificación y Predicción de mercados</div>
+            <div class="wi" data-q="Actúa como Agente Jurídico: normativas, análisis de contratos y asesoramiento legal"><span class="wi-icon">⚖️</span><strong>Agente Jurídico</strong> — Normativas, contratos y asesoramiento</div>
+            <div class="wi" data-q="Actúa como Agente Industrial: control de calidad en fabricación con IA"><span class="wi-icon">🏭</span><strong>Agente Industrial</strong> — Control de calidad en fabricación</div>
+            <div class="wi" data-q="Ayúdame con Desarrollo de Sistemas: diseño, arquitectura y programación de software"><span class="wi-icon">💻</span><strong>Desarrollo de Sistemas</strong> — Diseño y programación</div>
+          </div>
+        </div>
+        <div id="chatMsgs"></div>
+      </div>
+
+      <div class="inp-area">
+        <div class="inp-wrap">
+          <input type="file" id="fileInput" accept=".pdf,.txt,.png,.jpg,.jpeg,.csv,.json,.py,.js,.html,.md" style="display:none"/>
+          <div class="ibox">
+            <textarea id="inp" rows="1" placeholder="Buen día, ¿cómo puedo ayudarte hoy?"></textarea>
+            <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+              <button class="ibtn" id="attachBtn" title="Adjuntar">📎</button>
+              <button class="ibtn" title="Web" onclick="T('Búsqueda web en tiempo real')">🌐</button>
+              <button class="sbtn" id="sendBtn">➤</button>
+            </div>
+          </div>
+          <div class="hints">
+            <button class="hint" data-h="Explica detalladamente ">💡 Explicar</button>
+            <button class="hint" data-h="Crea un proyecto de ">🚀 Proyecto</button>
+            <button class="hint" data-h="Analiza y resume: ">📊 Analizar</button>
+            <button class="hint" data-h="Genera una imagen de ">🎨 Imagen</button>
+            <button class="hint" data-h="Escribe código Python para ">🐍 Python</button>
+            <button class="hint" data-h="Escribe código TensorFlow.js para ">🧠 TF.js</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- PLANS MODAL -->
+<div class="overlay hidden" id="plansOverlay">
+  <div style="background:#e0f5f0;border-radius:18px;width:700px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:su .25s ease;padding:0;">
+    <div style="padding:22px 26px 16px;border-bottom:1px solid rgba(0,100,80,.15);display:flex;align-items:center;justify-content:space-between;background:rgba(0,150,120,.08);border-radius:18px 18px 0 0;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#006050">Características de los Planes</div>
+        <div style="font-size:.82rem;color:#007060;margin-top:2px">Elegí el plan que mejor se adapta a tus necesidades</div>
+      </div>
+      <button id="plansClose" style="width:28px;height:28px;border-radius:7px;border:1px solid rgba(0,100,80,.2);background:transparent;cursor:pointer;font-size:.9rem;color:#006050;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div style="padding:22px 26px;display:flex;flex-direction:column;gap:18px;">
+
+      <!-- Plan Básico -->
+      <div style="background:#fff;border:2px solid #fbbf24;border-radius:14px;padding:18px 20px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="flex-shrink:0">
+          <svg width="64" height="64" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" fill="#fff" stroke="#fbbf24" stroke-width="3"/>
+            <path d="M50 50 L50 15" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <path d="M50 50 L80 65" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <path d="M50 50 L20 65" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <circle cx="50" cy="15" r="4" fill="#e0e0e0"/>
+            <circle cx="80" cy="65" r="4" fill="#e0e0e0"/>
+            <circle cx="20" cy="65" r="4" fill="#e0e0e0"/>
+            <!-- Needle pointing to yellow/right -->
+            <line x1="50" y1="50" x2="75" y2="30" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="5" fill="#fbbf24"/>
+            <text x="50" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#fbbf24" font-family="sans-serif">IA</text>
+          </svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:#92400e;margin-bottom:8px">Plan Básico</div>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:.84rem;color:#555;margin-bottom:10px">
+            <div>✓ Respuestas rápidas y concretas</div>
+            <div>✓ Limitado a <strong>10 consultas por día</strong> (no acumulativas)</div>
+            <div>✓ Acceso a todas las categorías temáticas</div>
+          </div>
+          <div style="display:inline-block;padding:5px 14px;background:#fef3c7;border:1px solid #fbbf24;border-radius:20px;font-weight:700;font-size:.88rem;color:#92400e">Costo: Gratis</div>
+        </div>
+      </div>
+
+      <!-- Plan Pro -->
+      <div style="background:#fff;border:2px solid #10b981;border-radius:14px;padding:18px 20px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="flex-shrink:0">
+          <svg width="64" height="64" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" fill="#fff" stroke="#10b981" stroke-width="3"/>
+            <path d="M50 50 L50 15" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <path d="M50 50 L80 65" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <path d="M50 50 L20 65" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <circle cx="50" cy="15" r="4" fill="#e0e0e0"/>
+            <circle cx="80" cy="65" r="4" fill="#e0e0e0"/>
+            <circle cx="20" cy="65" r="4" fill="#e0e0e0"/>
+            <!-- Needle pointing to top/green -->
+            <line x1="50" y1="50" x2="50" y2="20" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="5" fill="#10b981"/>
+            <text x="50" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#10b981" font-family="sans-serif">IA</text>
+          </svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:#065f46;margin-bottom:8px">Plan Pro</div>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:.84rem;color:#555;margin-bottom:10px">
+            <div>✓ Respuestas rápidas</div>
+            <div>✓ Acceso al Arte y creatividad</div>
+            <div>✓ Acceso al Análisis Técnico/Científico</div>
+            <div>✓ <strong>Sin límite</strong> de consultas por día</div>
+          </div>
+          <div style="display:inline-block;padding:5px 14px;background:#d1fae5;border:1px solid #10b981;border-radius:20px;font-weight:700;font-size:.88rem;color:#065f46">U$D 19,99/mes &nbsp;·&nbsp; U$D 250/año</div>
+        </div>
+      </div>
+
+      <!-- Plan Premium -->
+      <div style="background:#fff;border:2px solid #3b6bff;border-radius:14px;padding:18px 20px;display:flex;gap:18px;align-items:flex-start;">
+        <div style="flex-shrink:0">
+          <svg width="64" height="64" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" fill="#fff" stroke="#3b6bff" stroke-width="3"/>
+            <path d="M50 50 L50 15" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <path d="M50 50 L80 65" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <path d="M50 50 L20 65" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="3,3"/>
+            <circle cx="50" cy="15" r="4" fill="#e0e0e0"/>
+            <circle cx="80" cy="65" r="4" fill="#e0e0e0"/>
+            <circle cx="20" cy="65" r="4" fill="#e0e0e0"/>
+            <!-- Needle pointing to upper-left/blue -->
+            <line x1="50" y1="50" x2="25" y2="28" stroke="#3b6bff" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="5" fill="#3b6bff"/>
+            <text x="50" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#3b6bff" font-family="sans-serif">IA</text>
+          </svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:#1e3a8a;margin-bottom:8px">Plan Premium</div>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:.84rem;color:#555;margin-bottom:10px">
+            <div>✓ Máximo Rendimiento</div>
+            <div>✓ Acceso al Arte y creatividad</div>
+            <div>✓ Acceso al Análisis Técnico/Científico</div>
+            <div>✓ Desarrollo de Programas (Python, Java, JavaScript, TensorFlow…)</div>
+            <div>✓ Desarrollo de Sistemas completos</div>
+            <div>✓ <strong>Sin límite</strong> de consultas por día</div>
+          </div>
+          <div style="display:inline-block;padding:5px 14px;background:#dbeafe;border:1px solid #3b6bff;border-radius:20px;font-weight:700;font-size:.88rem;color:#1e3a8a">U$D 99,99/mes &nbsp;·&nbsp; U$D 1000/año</div>
+        </div>
+      </div>
+
+      <div style="text-align:center;padding-bottom:4px">
+        <button id="plansCloseBtn" style="padding:10px 28px;background:linear-gradient(135deg,#10b981,#3b6bff);color:#fff;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;">Entendido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="overlay hidden" id="apOverlay">
+  <div class="apanel">
+    <div class="ap-hdr">
+      <div class="ap-title">
+        <img src="assets/icon.png" style="width:22px;height:22px;object-fit:contain"/>
+        Panel de Configuración
+        <span class="badge-admin">ADMIN</span>
+      </div>
+      <button class="xbtn" id="apClose">✕</button>
+    </div>
+    <div class="ap-tabs" id="apTabs">
+      <div class="apt on" data-tab="stats">📊 Estadísticas</div>
+      <div class="apt" data-tab="users">👥 Usuarios</div>
+      <div class="apt" data-tab="config">⚙️ Configuración</div>
+      <div class="apt" data-tab="costs">💰 Costos</div>
+      <div class="apt" data-tab="models">🤖 Modelos IA</div>
+      <div class="apt" data-tab="security">🔐 Seguridad</div>
+    </div>
+    <div class="ap-body" id="apBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  EDUAR.AI — Clean JS (no nested quotes)
+// ═══════════════════════════════════════
+
+var AKEY = "1963EduardoAI";
+var API  = "/api/chat";
+var msgs = [], loading = false, curModel = "basico", isAdmin = false, curUser = null;
+
+// ── DATA ──────────────────────────────
+function gD() {
+  try { return JSON.parse(localStorage.getItem("eduar_d") || "null") || dD(); }
+  catch(e) { return dD(); }
+}
+function sD(d) { try { localStorage.setItem("eduar_d", JSON.stringify(d)); } catch(e) {} }
+function dD() {
+  return { users:[], config:{ sysName:"Eduar.ai", welcome:"Buen día, ¿cómo puedo ayudarte hoy?", apiModel:"claude-haiku-4-5-20251001", maxTokens:1024, adminKey:"1963EduardoAI" }, costs:{ perQuery:0.002, freeLimit:50, basic:9.99, pro:29.99, premium:99.99 }, stats:{ queries:0, users:0, tokens:0 }, log:[] };
+}
+
+// ── THEME ──────────────────────────────
+document.querySelectorAll(".tc").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var t = this.getAttribute("data-t") || "";
+    ["th-black","th-white","th-yellow","th-cyan"].forEach(function(c){ document.body.classList.remove(c); });
+    if (t) document.body.classList.add(t);
+    document.querySelectorAll(".tc").forEach(function(b){ b.classList.remove("active"); });
+    this.classList.add("active");
+    try { localStorage.setItem("eduar_theme", t); } catch(e) {}
+  });
+});
+(function() {
+  try {
+    var t = localStorage.getItem("eduar_theme") || "";
+    ["th-black","th-white","th-yellow","th-cyan"].forEach(function(c){ document.body.classList.remove(c); });
+    if (t) document.body.classList.add(t);
+    document.querySelectorAll(".tc").forEach(function(b){
+      b.classList.toggle("active", (b.getAttribute("data-t") || "") === t);
+    });
+  } catch(e) {}
+})();
+
+// ── LOGIN ──────────────────────────────
+document.getElementById("loginBtn").addEventListener("click", function() {
+  var name  = document.getElementById("lname").value.trim();
+  var email = document.getElementById("lemail").value.trim();
+  var err   = document.getElementById("lerr");
+  if (!name || !email || email.indexOf("@") < 0) {
+    err.style.display = "block";
+    return;
+  }
+  err.style.display = "none";
+  curUser = { name:name, email:email, plan:"Básico" };
+  try {
+    var d = gD();
+    var found = false;
+    for (var i = 0; i < d.users.length; i++) {
+      if (d.users[i].e === email) { found = true; curUser.plan = d.users[i].p || "Básico"; break; }
+    }
+    if (!found) {
+      d.users.push({ n:name, e:email, p:"Básico", s:"ok", q:0, c:0 });
+      d.stats.users = (d.stats.users||0) + 1;
+      sD(d);
+    }
+    log(name, "Login");
+  } catch(e) {}
+  enterApp();
+});
+
+document.getElementById("googleBtn").addEventListener("click", function() {
+  var name  = prompt("Ingresá tu nombre completo:");
+  var email = prompt("Ingresá tu email de Google:");
+  if (!name || !email) return;
+  document.getElementById("lname").value  = name;
+  document.getElementById("lemail").value = email;
+  document.getElementById("loginBtn").click();
+});
+
+function enterApp() {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").classList.add("on");
+  document.getElementById("uname2").textContent = curUser.name;
+  document.getElementById("uplan2").textContent = "Plan " + curUser.plan;
+  document.getElementById("uav").textContent = curUser.name.charAt(0).toUpperCase();
+}
+
+document.getElementById("logoutBtn").addEventListener("click", function() {
+  curUser = null; isAdmin = false; msgs = [];
+  document.getElementById("app").classList.remove("on");
+  document.getElementById("login").style.display = "flex";
+  document.getElementById("lname").value = "";
+  document.getElementById("lemail").value = "";
+  showAdmin(false);
+  document.getElementById("chatMsgs").innerHTML = "";
+  document.getElementById("wlc").classList.remove("hidden");
+});
+
+// ── ADMIN SHOW/HIDE ────────────────────
+function showAdmin(on) {
+  isAdmin = on;
+  document.querySelectorAll(".adm").forEach(function(el) {
+    el.style.display = on ? "" : "none";
+  });
+  if (on) document.getElementById("uplan2").textContent = "Administrador ⭐";
+}
+// Hide admin elements initially
+showAdmin(false);
+
+// ── SIDEBAR ────────────────────────────
+document.getElementById("menuBtn").addEventListener("click", function() {
+  document.getElementById("sb").classList.toggle("open");
+});
+document.getElementById("sbBrand").addEventListener("click", function() { newChat(); });
+document.getElementById("newBtn").addEventListener("click", function() { newChat(); });
+document.getElementById("adminBtn").addEventListener("click", function() { openAP(); });
+document.getElementById("consoleBtn").addEventListener("click", function() { window.open("console.html","_blank"); });
+document.getElementById("sbAdmin").addEventListener("click", function() { openAP(); });
+document.getElementById("sbConsole").addEventListener("click", function() { window.open("console.html","_blank"); });
+document.getElementById("sbConsole2").addEventListener("click", function() { window.open("console.html","_blank"); });
+
+document.querySelectorAll(".ci[data-msg], .sb-link[data-msg]").forEach(function(el) {
+  el.addEventListener("click", function() { T(this.getAttribute("data-msg")); });
+});
+
+// ── MODEL ──────────────────────────────
+document.getElementById("msel").addEventListener("click", function(e) {
+  if (!e.target.closest(".mopt")) document.getElementById("mdrop").classList.toggle("open");
+});
+document.querySelectorAll(".mopt").forEach(function(opt) {
+  opt.addEventListener("click", function(e) {
+    e.stopPropagation();
+    var plan = this.getAttribute("data-m");
+    if (plan === "ver") {
+      document.getElementById("mdrop").classList.remove("open");
+      document.getElementById("plansOverlay").classList.remove("hidden");
+      return;
+    }
+    curModel = plan;
+    var names = { basico:"Plan Básico", pro:"Plan Pro", premium:"Plan Premium" };
+    document.getElementById("mname").textContent = names[plan] || plan;
+    document.getElementById("mdrop").classList.remove("open");
+    T("Plan seleccionado: " + (names[plan]||plan));
+  });
+});
+document.addEventListener("click", function(e) {
+  if (!e.target.closest("#msel")) document.getElementById("mdrop").classList.remove("open");
+});
+// Plans modal close
+document.getElementById("plansClose").addEventListener("click", function() {
+  document.getElementById("plansOverlay").classList.add("hidden");
+});
+document.getElementById("plansCloseBtn").addEventListener("click", function() {
+  document.getElementById("plansOverlay").classList.add("hidden");
+});
+
+// ── WELCOME ITEMS ──────────────────────
+document.querySelectorAll(".wi[data-q]").forEach(function(el) {
+  el.addEventListener("click", function() { sendQ(this.getAttribute("data-q")); });
+});
+
+// ── HINTS ──────────────────────────────
+document.querySelectorAll(".hint[data-h]").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var inp = document.getElementById("inp");
+    inp.value = this.getAttribute("data-h");
+    inp.focus();
+    resize(inp);
+  });
+});
+
+// ── FILE ATTACH ────────────────────────
+document.getElementById("attachBtn").addEventListener("click", function() {
+  document.getElementById("fileInput").click();
+});
+document.getElementById("fileInput").addEventListener("change", function() {
+  var file = this.files[0];
+  if (!file) return;
+  if (file.size > 5*1024*1024) { T("Máximo 5MB por archivo"); return; }
+  T("Leyendo " + file.name + "...");
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var inp = document.getElementById("inp");
+    var existing = inp.value.trim();
+    var prefix = existing ? existing + "\n\n" : "";
+    if (file.type.indexOf("image") === 0) {
+      inp.value = prefix + "Analiza la imagen adjunta (" + file.name + ") y describí su contenido.";
+    } else {
+      var content = (e.target.result || "").substring(0, 4000);
+      inp.value = prefix + "Analiza el siguiente archivo (" + file.name + "):\n\n" + content;
+    }
+    resize(inp);
+    T("✅ " + file.name + " adjuntado");
+  };
+  if (file.type.indexOf("image") === 0) reader.readAsDataURL(file);
+  else reader.readAsText(file);
+  this.value = "";
+});
+
+// ── CHAT ───────────────────────────────
+var inp = document.getElementById("inp");
+inp.addEventListener("input", function() { resize(this); });
+inp.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+document.getElementById("sendBtn").addEventListener("click", function() { sendMsg(); });
+
+function resize(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 150) + "px";
+}
+
+function sendMsg() {
+  var txt = inp.value.trim();
+  if (!txt || loading) return;
+  // Check admin key
+  var d = gD();
+  var key = (d.config && d.config.adminKey) ? d.config.adminKey : AKEY;
+  if (txt === key) {
+    inp.value = ""; resize(inp);
+    showAdmin(true);
+    openAP();
+    log(curUser ? curUser.name : "Admin", "Acceso Admin");
+    T("✅ Bienvenido Administrador");
+    return;
+  }
+  document.getElementById("wlc").classList.add("hidden");
+  inp.value = ""; resize(inp);
+  addMsg("user", txt);
+
+  // ── Image generation detection ──
+  var imageKeywords = ["genera una imagen", "generar imagen", "crea una imagen", "crear imagen",
+    "dibuja", "genera imagen", "imagen de", "ilustra", "muéstrame una imagen",
+    "mostrame una imagen", "genera foto", "crea foto", "generate image", "draw"];
+  var isImageRequest = false;
+  var lowerTxt = txt.toLowerCase();
+  for (var ki = 0; ki < imageKeywords.length; ki++) {
+    if (lowerTxt.indexOf(imageKeywords[ki]) >= 0) { isImageRequest = true; break; }
+  }
+
+  if (isImageRequest) {
+    generateImage(txt);
+    return;
+  }
+
+  showTyping();
+  loading = true;
+  document.getElementById("sendBtn").disabled = true;
+  msgs.push({ role:"user", content:txt });
+  // Track
+  try { var d2=gD(); d2.stats.queries=(d2.stats.queries||0)+1; sD(d2); } catch(e) {}
+  callAPI();
+}
+
+function sendQ(q) { inp.value = q; sendMsg(); }
+
+var sysPrompts = {
+  "basico":   "Eres Eduar.ai, asistente de IA creado por Eduardo (Córdoba, Argentina). Das respuestas rápidas y concretas en español. Eres amable y claro. El usuario tiene Plan Básico con límite de 10 consultas diarias.",
+  "pro":      "Eres Eduar.ai en Plan Pro, creado por Eduardo. Brindás respuestas detalladas. Sos experto en arte y creatividad, análisis técnico y científico, tecnología y finanzas. Respondés siempre en español con claridad y profundidad.",
+  "premium":  "Eres Eduar.ai en Plan Premium, máximo rendimiento, creado por Eduardo. Sos experto en todo: ciencia, tecnología, arte, música, literatura, finanzas, programación (Python, Java, JavaScript, TensorFlow) y desarrollo de sistemas completos. Respondés en español con la máxima calidad y detalle.",
+  "Eduar-Pro":"Eres Eduar.ai, asistente de IA avanzado creado por Eduardo (Córdoba, Argentina). Ayudás en ciencia, tecnología, arte, música, literatura, finanzas y más. Siempre en español, con claridad y calidez."
+};
+
+async function callAPI() {
+  try {
+    var res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({ model:"claude-haiku-4-5-20251001", system: sysPrompts[curModel] || sysPrompts["Eduar-Pro"], messages: msgs })
+    });
+    var data = await res.json();
+    removeTyping();
+    if (!res.ok) {
+      addMsg("ai", "⚠️ " + (data.error || "Error de conexión."));
+    } else {
+      var reply = (data.content||[]).map(function(b){ return b.text||""; }).join("") || "Sin respuesta.";
+      msgs.push({ role:"assistant", content:reply });
+      addMsg("ai", reply);
+      try { var d3=gD(); d3.stats.tokens=(d3.stats.tokens||0)+((data.usage&&data.usage.output_tokens)||0); sD(d3); } catch(e) {}
+    }
+  } catch(e) {
+    removeTyping();
+    addMsg("ai", "⚠️ No se pudo conectar. Verificá tu conexión.");
+  }
+  loading = false;
+  document.getElementById("sendBtn").disabled = false;
+}
+
+function addMsg(role, txt) {
+  var c = document.getElementById("chatMsgs");
+  var d = document.createElement("div");
+  d.className = "msg " + role;
+  if (role === "ai") {
+    var av = document.createElement("div"); av.className = "msg-av";
+    var img = document.createElement("img"); img.src = "assets/icon.png"; av.appendChild(img);
+    var wrap = document.createElement("div");
+    var bub = document.createElement("div"); bub.className = "bubble"; bub.innerHTML = fmt(txt);
+    var acts = document.createElement("div"); acts.className = "macts";
+    var b1 = document.createElement("button"); b1.className = "mab"; b1.textContent = "📋 Copiar";
+    b1.addEventListener("click", function() { navigator.clipboard.writeText(bub.innerText); T("Copiado"); });
+    var b2 = document.createElement("button"); b2.className = "mab"; b2.textContent = "👍";
+    b2.addEventListener("click", function() { T("¡Gracias por tu valoración!"); });
+    var b3 = document.createElement("button"); b3.className = "mab"; b3.textContent = "👎";
+    b3.addEventListener("click", function() { T("Registrado, mejoraremos"); });
+    var b4 = document.createElement("button"); b4.className = "mab"; b4.textContent = "🔄 Regenerar";
+    b4.addEventListener("click", function() { regen(); });
+    acts.appendChild(b1); acts.appendChild(b2); acts.appendChild(b3); acts.appendChild(b4);
+    wrap.appendChild(bub); wrap.appendChild(acts);
+    d.appendChild(av); d.appendChild(wrap);
+  } else {
+    var bub2 = document.createElement("div"); bub2.className = "bubble"; bub2.textContent = txt;
+    d.appendChild(bub2);
+  }
+  c.appendChild(d);
+  document.getElementById("msgs").scrollTop = 99999;
+}
+
+function fmt(t) {
+  t = esc(t);
+  t = t.replace(/```(\w*)\n([\s\S]*?)```/g, "<pre><code>$2</code></pre>");
+  t = t.replace(/`([^`]+)`/g, "<code>$1</code>");
+  t = t.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  t = t.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  t = t.replace(/^#{1,3} (.+)$/gm, "<strong style='display:block;margin:5px 0 2px'>$1</strong>");
+  t = t.replace(/\n/g, "<br>");
+  return t;
+}
+function esc(t) { var d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+
+function showTyping() {
+  var c = document.getElementById("chatMsgs");
+  var d = document.createElement("div"); d.className = "msg ai"; d.id = "typing";
+  var av = document.createElement("div"); av.className = "msg-av";
+  var img = document.createElement("img"); img.src = "assets/icon.png"; av.appendChild(img);
+  var bub = document.createElement("div"); bub.className = "bubble";
+  var typ = document.createElement("div"); typ.className = "typing";
+  for (var i = 0; i < 3; i++) { var dot = document.createElement("div"); dot.className = "td"; typ.appendChild(dot); }
+  bub.appendChild(typ); d.appendChild(av); d.appendChild(bub);
+  c.appendChild(d);
+  document.getElementById("msgs").scrollTop = 99999;
+}
+function removeTyping() { var t = document.getElementById("typing"); if (t) t.remove(); }
+function regen() {
+  if (msgs.length < 1) return;
+  if (msgs[msgs.length-1].role === "assistant") msgs.pop();
+  if (msgs.length > 0 && msgs[msgs.length-1].role === "user") {
+    showTyping(); loading = true; document.getElementById("sendBtn").disabled = true; callAPI();
+  }
+}
+function newChat() {
+  msgs = [];
+  document.getElementById("chatMsgs").innerHTML = "";
+  document.getElementById("wlc").classList.remove("hidden");
+}
+
+// ── ADMIN PANEL ────────────────────────
+function openAP() { document.getElementById("apOverlay").classList.remove("hidden"); renderTab("stats"); }
+function closeAP() { document.getElementById("apOverlay").classList.add("hidden"); }
+document.getElementById("apClose").addEventListener("click", closeAP);
+document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeAP(); });
+
+document.querySelectorAll(".apt").forEach(function(tab) {
+  tab.addEventListener("click", function() {
+    document.querySelectorAll(".apt").forEach(function(t){ t.classList.remove("on"); });
+    this.classList.add("on");
+    renderTab(this.getAttribute("data-tab"));
+  });
+});
+
+function renderTab(tab) {
+  var body = document.getElementById("apBody");
+  var d = gD();
+  var s = d.stats || {};
+  var html = "";
+
+  if (tab === "stats") {
+    html += '<div class="asec"><h3>Resumen General</h3><div class="sgrid">';
+    html += mkSC(s.queries||0, "Consultas Totales");
+    html += mkSC((d.users||[]).length, "Usuarios Registrados");
+    html += mkSC("99.97%", "Uptime");
+    html += mkSC(s.tokens||0, "Tokens Usados");
+    html += '</div></div>';
+    html += '<div class="asec"><h3>Últimos Accesos</h3>' + mkLog(d.log||[]) + '</div>';
+  }
+  else if (tab === "users") {
+    html += '<div class="asec">';
+    html += '<div class="brow" style="margin-bottom:12px">';
+    html += '<button class="abtn p" id="btnNewUser">+ Nuevo Usuario</button>';
+    html += '<button class="abtn s" id="btnExport">📥 Exportar CSV</button>';
+    html += '</div>';
+    html += '<div id="iform"></div>';
+    html += mkUsersTable(d.users||[]);
+    html += '</div>';
+    html += '<div class="asec"><h3>Acreditar Créditos</h3>';
+    html += '<div class="frow"><div class="fg"><label>Email del usuario</label><input id="cEmail" placeholder="email@usuario.com"/></div>';
+    html += '<div class="fg"><label>Monto (USD)</label><input type="number" id="cAmt" placeholder="10" min="1"/></div></div>';
+    html += '<div class="brow"><button class="abtn p" id="btnCredit">💳 Acreditar</button></div>';
+    html += '</div>';
+    // Upgrade requests section
+    var reqs = (d.upgradeRequests || []);
+    if (reqs.length > 0) {
+      html += '<div class="asec"><h3>Solicitudes de Upgrade Pendientes</h3>';
+      html += '<table class="tbl"><thead><tr><th>Nombre</th><th>Email</th><th>Plan Solicitado</th><th>Fecha</th><th>Comprobante</th><th>Estado</th></tr></thead><tbody>';
+      for (var ri = 0; ri < reqs.length; ri++) {
+        var r = reqs[ri];
+        html += '<tr><td>' + r.name + '</td><td>' + r.email + '</td><td>' + r.plan + '</td><td>' + r.date + '</td>';
+        html += '<td>' + (r.hasReceipt ? '<span class="bdg ok">Adjunto</span>' : '<span class="bdg off">Sin comprobante</span>') + '</td>';
+        html += '<td><span class="bdg ' + (r.status === "aprobado" ? "ok" : "off") + '">' + r.status + '</span></td></tr>';
+      }
+      html += '</tbody></table></div>';
+    }
+  }
+  else if (tab === "config") {
+    var cfg = d.config || {};
+    html += '<div class="asec"><h3>Configuración del Sistema</h3>';
+    html += '<div class="frow"><div class="fg"><label>Nombre del Sistema</label><input id="cfgN" value="' + (cfg.sysName||"Eduar.ai") + '"/></div>';
+    html += '<div class="fg"><label>Idioma</label><select id="cfgL"><option>Español</option><option>English</option></select></div></div>';
+    html += '<div class="frow full"><div class="fg"><label>Mensaje de Bienvenida</label><input id="cfgW" value="' + (cfg.welcome||"") + '"/></div></div>';
+    html += '<div class="frow"><div class="fg"><label>Modelo API</label><input id="cfgM" value="' + (cfg.apiModel||"claude-haiku-4-5-20251001") + '"/></div>';
+    html += '<div class="fg"><label>Max Tokens</label><input type="number" id="cfgT" value="' + (cfg.maxTokens||1024) + '"/></div></div>';
+    html += '<div class="brow"><button class="abtn p" id="btnSaveCfg">💾 Guardar</button></div>';
+    html += '</div>';
+  }
+  else if (tab === "costs") {
+    var cs = d.costs || {};
+    html += '<div class="asec"><h3>Precios</h3>';
+    html += '<div class="frow"><div class="fg"><label>Precio por Consulta (USD)</label><input type="number" step=".001" id="cPQ" value="' + (cs.perQuery||0.002) + '"/></div>';
+    html += '<div class="fg"><label>Consultas Gratuitas</label><input type="number" id="cFL" value="' + (cs.freeLimit||50) + '"/></div></div>';
+    html += '<div class="frow"><div class="fg"><label>Plan Básico (USD/mes)</label><input type="number" id="cB" value="' + (cs.basic||9.99) + '"/></div>';
+    html += '<div class="fg"><label>Plan Pro (USD/mes)</label><input type="number" id="cP" value="' + (cs.pro||29.99) + '"/></div></div>';
+    html += '<div class="frow full"><div class="fg"><label>Plan Premium (USD/mes)</label><input type="number" id="cPR" value="' + (cs.premium||99.99) + '"/></div></div>';
+    html += '<div class="brow"><button class="abtn p" id="btnSaveCosts">💾 Actualizar</button></div></div>';
+    html += '<div class="asec"><h3>Datos Bancarios</h3>';
+    html += '<div style="background:rgba(59,107,255,.06);border:1px solid rgba(59,107,255,.15);border-radius:9px;padding:14px">';
+    html += '<div style="font-size:.66rem;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">CUENTA DESTINO PARA CRÉDITOS</div>';
+    html += '<div style="font-family:monospace;font-size:.95rem;font-weight:700;color:var(--acc)">CBU: 0150887911000001781052</div>';
+    html += '<div style="font-size:.8rem;margin-top:5px">ICBC · Titular: <strong>Felipe Eduardo Mansilla</strong> · Alias: <strong>1963Edu14</strong></div>';
+    html += '<div style="font-size:.73rem;color:var(--txt3);margin-top:4px">Los créditos se acreditarán dentro de las próximas 48hs hábiles.</div>';
+    html += '</div></div>';
+  }
+  else if (tab === "models") {
+    var users = d.users || [];
+    html += '<div class="asec"><h3>Acceso por Usuario</h3>';
+    html += '<div class="fg"><label>Seleccionar Usuario</label><select id="mUserSel">';
+    html += '<option value="">-- Seleccionar --</option>';
+    for (var i = 0; i < users.length; i++) {
+      html += '<option value="' + i + '">' + users[i].n + ' (' + users[i].e + ')</option>';
+    }
+    html += '</select></div>';
+    html += '<div id="mUserArea"></div></div>';
+    html += '<div class="asec"><h3>Modelos Disponibles</h3>';
+    var mdefs = [["Eduar-Rápido","Respuestas rápidas","Gratis"],["Eduar-Arte","Arte y creatividad","Gratis"],["Eduar-Ciencia","Análisis científico","Plan Pro"],["Eduar-Pro","Máximo rendimiento","Plan Premium"]];
+    for (var j = 0; j < mdefs.length; j++) {
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bor)">';
+      html += '<div><strong>' + mdefs[j][0] + '</strong><br><span style="font-size:.73rem;color:var(--txt3)">' + mdefs[j][1] + ' · ' + mdefs[j][2] + '</span></div>';
+      html += '<span class="bdg ok">Activo</span></div>';
+    }
+    html += '</div>';
+  }
+  else if (tab === "security") {
+    html += '<div class="asec"><h3>Cambiar Clave de Administrador</h3>';
+    html += '<div class="frow"><div class="fg"><label>Clave Actual</label><input type="password" id="k1" placeholder="Clave actual"/></div>';
+    html += '<div class="fg"><label>Nueva Clave</label><input type="password" id="k2" placeholder="Mínimo 8 caracteres"/></div></div>';
+    html += '<div class="frow full"><div class="fg"><label>Confirmar Nueva Clave</label><input type="password" id="k3" placeholder="Repetir nueva clave"/></div></div>';
+    html += '<div class="brow"><button class="abtn p" id="btnKey">🔐 Actualizar Clave</button></div></div>';
+    html += '<div class="asec"><h3>Registro de Accesos</h3>';
+    html += '<div class="brow" style="margin-bottom:9px"><button class="abtn s" id="btnClearLog">🗑️ Limpiar</button></div>';
+    html += mkLog(d.log||[]);
+    html += '</div>';
+  }
+
+  body.innerHTML = html;
+  bindTabEvents(tab);
+}
+
+function bindTabEvents(tab) {
+  var d = gD();
+  if (tab === "users") {
+    var btnN = document.getElementById("btnNewUser");
+    if (btnN) btnN.addEventListener("click", function() { showNewUserForm(); });
+    var btnE = document.getElementById("btnExport");
+    if (btnE) btnE.addEventListener("click", function() { exportCSV(); });
+    var btnC = document.getElementById("btnCredit");
+    if (btnC) btnC.addEventListener("click", function() { acreditar(); });
+  }
+  if (tab === "config") {
+    var btnS = document.getElementById("btnSaveCfg");
+    if (btnS) btnS.addEventListener("click", function() { saveCfg(); });
+  }
+  if (tab === "costs") {
+    var btnSC = document.getElementById("btnSaveCosts");
+    if (btnSC) btnSC.addEventListener("click", function() { saveCosts(); });
+  }
+  if (tab === "models") {
+    var sel = document.getElementById("mUserSel");
+    if (sel) sel.addEventListener("change", function() { renderModelUser(parseInt(this.value)); });
+  }
+  if (tab === "security") {
+    var btnK = document.getElementById("btnKey");
+    if (btnK) btnK.addEventListener("click", function() { changeKey(); });
+    var btnCL = document.getElementById("btnClearLog");
+    if (btnCL) btnCL.addEventListener("click", function() { var d2=gD(); d2.log=[]; sD(d2); T("Registro limpiado"); renderTab("security"); });
+  }
+}
+
+function mkSC(val, lbl) {
+  return '<div class="sc"><div class="sv">' + val + '</div><div class="sl">' + lbl + '</div></div>';
+}
+function mkLog(log) {
+  if (!log || log.length === 0) return '<div class="empty">Sin registros aún.</div>';
+  var h = '<table class="tbl"><thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th></tr></thead><tbody>';
+  for (var i = 0; i < Math.min(log.length, 15); i++) {
+    h += '<tr><td>' + log[i].date + '</td><td>' + log[i].user + '</td><td><span class="bdg ok">' + log[i].action + '</span></td></tr>';
+  }
+  return h + '</tbody></table>';
+}
+function mkUsersTable(users) {
+  if (!users || users.length === 0) return '<div class="empty">Sin usuarios registrados. Usá "+ Nuevo Usuario".</div>';
+  var h = '<table class="tbl"><thead><tr><th>Nombre</th><th>Email</th><th>Plan</th><th>Estado</th><th>Consultas</th><th>Créditos</th><th></th></tr></thead><tbody>';
+  for (var i = 0; i < users.length; i++) {
+    var u = users[i];
+    var planClass = u.p === "Premium" ? "vip" : u.p === "Pro" ? "pro" : "ok";
+    h += '<tr>';
+    h += '<td><strong>' + u.n + '</strong></td>';
+    h += '<td>' + u.e + '</td>';
+    h += '<td><span class="bdg ' + planClass + '">' + u.p + '</span></td>';
+    h += '<td><span class="bdg ' + (u.s === "ok" ? "ok" : "off") + '">' + (u.s === "ok" ? "Activo" : "Inactivo") + '</span></td>';
+    h += '<td>' + (u.q||0) + '</td>';
+    h += '<td>$' + (u.c||0) + '</td>';
+    h += '<td><button class="abtn s" style="padding:3px 8px;font-size:.68rem" data-ui="' + i + '">Editar</button></td>';
+    h += '</tr>';
+  }
+  h += '</tbody></table>';
+  // Bind edit buttons after setting innerHTML
+  setTimeout(function() {
+    document.querySelectorAll("button[data-ui]").forEach(function(btn) {
+      btn.addEventListener("click", function() { showEditUserForm(parseInt(this.getAttribute("data-ui"))); });
+    });
+  }, 10);
+  return h;
+}
+
+function showNewUserForm() {
+  var area = document.getElementById("iform");
+  if (!area) return;
+  area.innerHTML = '<div class="iform"><h4>Nuevo Usuario</h4>' +
+    '<div class="frow"><div class="fg"><label>Nombre</label><input id="fuN" placeholder="Nombre Apellido"/></div>' +
+    '<div class="fg"><label>Email</label><input type="email" id="fuE" placeholder="email@..."/></div></div>' +
+    '<div class="frow"><div class="fg"><label>Plan</label><select id="fuP"><option>Básico</option><option>Pro</option><option>Premium</option></select></div>' +
+    '<div class="fg"><label>Créditos iniciales</label><input type="number" id="fuC" value="0"/></div></div>' +
+    '<div class="brow"><button class="abtn p" id="btnSaveNew">✅ Guardar</button>' +
+    '<button class="abtn s" id="btnCancelNew">Cancelar</button></div></div>';
+  document.getElementById("btnSaveNew").addEventListener("click", function() { saveNewUser(); });
+  document.getElementById("btnCancelNew").addEventListener("click", function() { document.getElementById("iform").innerHTML = ""; });
+}
+
+function saveNewUser() {
+  var n = (document.getElementById("fuN")||{}).value||"";
+  var e = (document.getElementById("fuE")||{}).value||"";
+  var p = (document.getElementById("fuP")||{}).value||"Básico";
+  var c = parseFloat((document.getElementById("fuC")||{}).value||0);
+  if (!n || !e || e.indexOf("@") < 0) { T("Completá nombre y email válido"); return; }
+  var d = gD();
+  d.users.push({ n:n, e:e, p:p, s:"ok", q:0, c:c });
+  sD(d); T("✅ Usuario " + n + " creado");
+  renderTab("users");
+  document.querySelectorAll(".apt").forEach(function(t,i){ t.classList.toggle("on",i===1); });
+}
+
+function showEditUserForm(idx) {
+  var d = gD(); var u = d.users[idx];
+  var area = document.getElementById("iform");
+  if (!area || !u) return;
+  area.innerHTML = '<div class="iform"><h4>Editar: ' + u.n + '</h4>' +
+    '<div class="frow"><div class="fg"><label>Nombre</label><input id="euN" value="' + u.n + '"/></div>' +
+    '<div class="fg"><label>Email</label><input type="email" id="euE" value="' + u.e + '"/></div></div>' +
+    '<div class="frow"><div class="fg"><label>Plan</label><select id="euP">' +
+    '<option' + (u.p==="Básico"?" selected":"") + '>Básico</option>' +
+    '<option' + (u.p==="Pro"?" selected":"") + '>Pro</option>' +
+    '<option' + (u.p==="Premium"?" selected":"") + '>Premium</option>' +
+    '</select></div>' +
+    '<div class="fg"><label>Estado</label><select id="euS">' +
+    '<option value="ok"' + (u.s==="ok"?" selected":"") + '>Activo</option>' +
+    '<option value="off"' + (u.s!=="ok"?" selected":"") + '>Inactivo</option>' +
+    '</select></div></div>' +
+    '<div class="brow"><button class="abtn p" id="btnSaveEdit">💾 Guardar</button>' +
+    '<button class="abtn s" id="btnCancelEdit">Cancelar</button>' +
+    '<button class="abtn d" id="btnDelUser">🗑️ Eliminar</button></div></div>';
+  document.getElementById("btnSaveEdit").addEventListener("click", function() {
+    var d2=gD();
+    d2.users[idx].n = document.getElementById("euN").value;
+    d2.users[idx].e = document.getElementById("euE").value;
+    d2.users[idx].p = document.getElementById("euP").value;
+    d2.users[idx].s = document.getElementById("euS").value;
+    sD(d2); T("✅ Usuario actualizado");
+    renderTab("users");
+    document.querySelectorAll(".apt").forEach(function(t,i){ t.classList.toggle("on",i===1); });
+  });
+  document.getElementById("btnCancelEdit").addEventListener("click", function() { document.getElementById("iform").innerHTML = ""; });
+  document.getElementById("btnDelUser").addEventListener("click", function() {
+    if (!confirm("¿Eliminar este usuario?")) return;
+    var d3=gD(); d3.users.splice(idx,1); sD(d3); T("Usuario eliminado");
+    renderTab("users");
+    document.querySelectorAll(".apt").forEach(function(t,i){ t.classList.toggle("on",i===1); });
+  });
+}
+
+function acreditar() {
+  var email = (document.getElementById("cEmail")||{}).value||"";
+  var amt   = parseFloat((document.getElementById("cAmt")||{}).value||0);
+  if (!email||!amt) { T("Completá email y monto"); return; }
+  var d = gD(); var found = false;
+  d.users.forEach(function(u){ if(u.e===email){ u.c=(u.c||0)+amt; found=true; } });
+  if (!found) { T("Usuario no encontrado: " + email); return; }
+  sD(d); T("✅ $" + amt.toFixed(2) + " acreditados a " + email);
+}
+
+function saveCfg() {
+  var d = gD(); d.config = d.config||{};
+  d.config.sysName   = (document.getElementById("cfgN")||{}).value||d.config.sysName;
+  d.config.welcome   = (document.getElementById("cfgW")||{}).value||d.config.welcome;
+  d.config.apiModel  = (document.getElementById("cfgM")||{}).value||d.config.apiModel;
+  d.config.maxTokens = parseInt((document.getElementById("cfgT")||{}).value||1024);
+  sD(d); T("✅ Configuración guardada");
+}
+
+function saveCosts() {
+  var d = gD();
+  d.costs = {
+    perQuery: parseFloat((document.getElementById("cPQ")||{}).value||0.002),
+    freeLimit:parseInt((document.getElementById("cFL")||{}).value||50),
+    basic:    parseFloat((document.getElementById("cB")||{}).value||9.99),
+    pro:      parseFloat((document.getElementById("cP")||{}).value||29.99),
+    premium:  parseFloat((document.getElementById("cPR")||{}).value||99.99)
+  };
+  sD(d); T("✅ Precios actualizados y guardados");
+}
+
+function renderModelUser(idx) {
+  if (isNaN(idx)) return;
+  var d = gD(); var u = d.users[idx];
+  var area = document.getElementById("mUserArea");
+  if (!area || !u) return;
+  var access = { "Básico":["Eduar-Rápido","Eduar-Arte"], "Pro":["Eduar-Rápido","Eduar-Arte","Eduar-Ciencia"], "Premium":["Eduar-Rápido","Eduar-Arte","Eduar-Ciencia","Eduar-Pro"] };
+  var acc = access[u.p] || access["Básico"];
+  var all = ["Eduar-Rápido","Eduar-Arte","Eduar-Ciencia","Eduar-Pro"];
+  var h = '<div style="margin:9px 0;font-size:.83rem"><strong>' + u.n + '</strong> · Plan: <strong>' + u.p + '</strong></div>';
+  for (var i = 0; i < all.length; i++) {
+    var ok = acc.indexOf(all[i]) >= 0;
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bor)">';
+    h += '<span style="font-size:.82rem">' + all[i] + '</span>';
+    h += '<div style="display:flex;gap:7px;align-items:center"><span class="bdg ' + (ok?"ok":"off") + '">' + (ok?"Activo":"Sin acceso") + '</span>';
+    h += '<button class="abtn s" style="padding:3px 8px;font-size:.7rem" data-mi="' + i + '">' + (ok?"Desactivar":"Activar") + '</button></div></div>';
+  }
+  area.innerHTML = h;
+  area.querySelectorAll("button[data-mi]").forEach(function(btn) {
+    btn.addEventListener("click", function() { T("Modelo actualizado"); });
+  });
+}
+
+function changeKey() {
+  var d = gD();
+  var cur = (d.config&&d.config.adminKey)||AKEY;
+  var k1 = (document.getElementById("k1")||{}).value||"";
+  var k2 = (document.getElementById("k2")||{}).value||"";
+  var k3 = (document.getElementById("k3")||{}).value||"";
+  if (k1!==cur) { T("La clave actual es incorrecta"); return; }
+  if (!k2||k2.length<8) { T("La nueva clave debe tener al menos 8 caracteres"); return; }
+  if (k2!==k3) { T("Las claves nuevas no coinciden"); return; }
+  d.config.adminKey = k2; sD(d); AKEY = k2;
+  T("🔐 Clave actualizada correctamente");
+  log("Admin", "Cambio de clave");
+}
+
+function exportCSV() {
+  var d = gD();
+  var csv = "Nombre,Email,Plan,Estado,Consultas,Creditos\n" +
+    (d.users||[]).map(function(u){ return [u.n,u.e,u.p,u.s==="ok"?"Activo":"Inactivo",u.q||0,u.c||0].join(","); }).join("\n");
+  var a = document.createElement("a");
+  a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+  a.download = "eduar-usuarios.csv"; a.click();
+}
+
+function log(user, action) {
+  try {
+    var d = gD();
+    var now = new Date();
+    d.log = d.log || [];
+    d.log.unshift({ date: now.toLocaleDateString("es-AR") + " " + now.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}), user:user, action:action });
+    d.log = d.log.slice(0, 100);
+    sD(d);
+  } catch(e) {}
+}
+
+function T(msg) {
+  var ex = document.querySelector(".toast"); if (ex) ex.remove();
+  var t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.remove(); }, 3000);
+}
+
+// ── UPGRADE PLAN ──────────────────────────
+var selectedUpgradePlan = null;
+
+document.getElementById("upgradePlanBtn").addEventListener("click", function() {
+  // Pre-fill name and email from current user
+  if (curUser) {
+    var nEl = document.getElementById("upg-name");
+    var eEl = document.getElementById("upg-email");
+    if (nEl) nEl.value = curUser.name || "";
+    if (eEl) eEl.value = curUser.email || "";
+  }
+  selectedUpgradePlan = null;
+  // Reset UI
+  document.getElementById("upg-payment").style.display = "none";
+  document.getElementById("upg-pro-card").style.boxShadow = "";
+  document.getElementById("upg-premium-card").style.boxShadow = "";
+  document.getElementById("upgradeOverlay").classList.remove("hidden");
+});
+
+document.getElementById("upgradeClose").addEventListener("click", function() {
+  document.getElementById("upgradeOverlay").classList.add("hidden");
+});
+
+function selectUpgradePlan(plan) {
+  selectedUpgradePlan = plan;
+  // Highlight selected card
+  document.getElementById("upg-pro-card").style.boxShadow = plan === "pro" ? "0 0 0 3px #10b981" : "";
+  document.getElementById("upg-premium-card").style.boxShadow = plan === "premium" ? "0 0 0 3px #3b6bff" : "";
+  // Show check
+  var proCheck = document.getElementById("upg-pro-check");
+  var premCheck = document.getElementById("upg-premium-check");
+  if (proCheck) proCheck.style.display = plan === "pro" ? "flex" : "none";
+  if (premCheck) premCheck.style.display = plan === "premium" ? "flex" : "none";
+  // Update amount
+  var amtEl = document.getElementById("upg-amount");
+  if (amtEl) amtEl.textContent = plan === "pro" ? "U$D 19,99/mes  (o U$D 250/año)" : "U$D 99,99/mes  (o U$D 1.000/año)";
+  // Show payment section
+  document.getElementById("upg-payment").style.display = "block";
+  // Scroll to payment
+  setTimeout(function() {
+    var el = document.getElementById("upg-payment");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, 100);
+}
+
+// File upload handler
+document.getElementById("upg-file-input").addEventListener("change", function() {
+  var file = this.files[0];
+  if (!file) return;
+  var nameEl = document.getElementById("upg-file-name");
+  if (nameEl) {
+    nameEl.style.display = "block";
+    nameEl.textContent = "✅ Comprobante adjunto: " + file.name;
+  }
+  var area = document.getElementById("upg-upload-area");
+  if (area) {
+    area.style.borderColor = "#10b981";
+    area.style.background = "#d1fae5";
+  }
+  T("✅ " + file.name + " adjuntado");
+});
+
+// Confirm button
+document.getElementById("upg-confirm-btn").addEventListener("click", function() {
+  var name  = (document.getElementById("upg-name") || {}).value || "";
+  var email = (document.getElementById("upg-email") || {}).value || "";
+  var file  = document.getElementById("upg-file-input").files[0];
+  if (!selectedUpgradePlan) { T("⚠️ Seleccioná un plan primero"); return; }
+  if (!name || !email) { T("⚠️ Completá nombre y email"); return; }
+  var planName = selectedUpgradePlan === "pro" ? "Plan Pro" : "Plan Premium";
+  // Save request in localStorage
+  try {
+    var d = getData();
+    d.upgradeRequests = d.upgradeRequests || [];
+    d.upgradeRequests.push({
+      name: name, email: email, plan: planName,
+      date: new Date().toLocaleDateString("es-AR"),
+      status: "pendiente",
+      hasReceipt: !!file
+    });
+    sD(d);
+  } catch(e) {}
+  document.getElementById("upgradeOverlay").classList.add("hidden");
+  T("✅ Solicitud enviada. Tu " + planName + " se activará en 24-48hs hábiles tras confirmar la transferencia.");
+  // Show success message in chat
+  document.getElementById("wlc").classList.add("hidden");
+  addMsg("ai", "¡Gracias " + name + "! Tu solicitud de upgrade al " + planName + " fue recibida correctamente. Una vez que confirmemos la transferencia al CBU 0150887911000001781052 (ICBC · Felipe Eduardo Mansilla), tu plan se activará en 24-48hs hábiles. Si tenés dudas, escribime aquí mismo. 🎉");
+});
+
+
+// ── IMAGE GENERATION (Pollinations.ai - gratuito) ─────
+function generateImage(prompt) {
+  // Extract description after trigger words
+  var desc = prompt;
+  var prefixes = [
+    "genera una imagen de", "genera una imagen", "generar imagen de", "generar imagen",
+    "crea una imagen de", "crea una imagen", "crear imagen de", "crear imagen",
+    "dibuja un", "dibuja una", "dibuja", "genera imagen de", "genera imagen",
+    "imagen de", "ilustra un", "ilustra una", "ilustra",
+    "muéstrame una imagen de", "mostrame una imagen de",
+    "genera foto de", "crea foto de", "generate image of", "generate image",
+    "draw a", "draw"
+  ];
+  var lowerDesc = desc.toLowerCase();
+  for (var pi = 0; pi < prefixes.length; pi++) {
+    if (lowerDesc.startsWith(prefixes[pi])) {
+      desc = desc.substring(prefixes[pi].length).trim();
+      break;
+    }
+  }
+  if (!desc || desc.length < 2) desc = prompt;
+
+  // Create message container
+  var container = document.getElementById("chatMsgs");
+  var msgDiv = document.createElement("div");
+  msgDiv.className = "msg ai";
+
+  var avDiv = document.createElement("div");
+  avDiv.className = "msg-av";
+  var avImg = document.createElement("img");
+  avImg.src = "assets/icon.png";
+  avDiv.appendChild(avImg);
+
+  var wrapDiv = document.createElement("div");
+  wrapDiv.style.cssText = "max-width:85%";
+
+  // Show loading indicator
+  var loadBubble = document.createElement("div");
+  loadBubble.className = "bubble";
+  loadBubble.innerHTML = '<div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>' +
+    '<div style="font-size:.8rem;color:var(--txt2);margin-top:6px">Generando imagen: <em>' + escHtml(desc) + '</em>...</div>';
+  wrapDiv.appendChild(loadBubble);
+  msgDiv.appendChild(avDiv);
+  msgDiv.appendChild(wrapDiv);
+  container.appendChild(msgDiv);
+  document.getElementById("msgs").scrollTop = 99999;
+
+  // Build image URL
+  var seed = Math.floor(Math.random() * 999999);
+  var encodedPrompt = encodeURIComponent(desc + ", high quality, detailed");
+  var imageUrl = "https://image.pollinations.ai/prompt/" + encodedPrompt +
+    "?width=768&height=512&seed=" + seed + "&nologo=true&enhance=true";
+
+  // Load image
+  var imgEl = new Image();
+
+  imgEl.onload = function() {
+    wrapDiv.innerHTML = "";
+    var bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.style.cssText = "padding:10px;";
+
+    var caption = document.createElement("div");
+    caption.style.cssText = "font-size:.81rem;color:var(--txt2);margin-bottom:8px;";
+    caption.innerHTML = "🎨 <em>" + escHtml(desc) + "</em>";
+
+    imgEl.style.cssText = "width:100%;max-width:500px;display:block;border-radius:10px;cursor:pointer;";
+    imgEl.alt = desc;
+    imgEl.title = "Click para abrir en tamaño completo";
+    imgEl.addEventListener("click", function() { window.open(imageUrl, "_blank"); });
+
+    var btnRow = document.createElement("div");
+    btnRow.style.cssText = "display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;";
+
+    var dlBtn = document.createElement("a");
+    dlBtn.href = imageUrl;
+    dlBtn.download = "eduar-imagen.jpg";
+    dlBtn.target = "_blank";
+    dlBtn.className = "mab";
+    dlBtn.style.cssText = "text-decoration:none;display:inline-flex;align-items:center;";
+    dlBtn.textContent = "⬇️ Descargar";
+
+    var regenBtn = document.createElement("button");
+    regenBtn.className = "mab";
+    regenBtn.textContent = "🔄 Nueva variación";
+    regenBtn.addEventListener("click", function() { generateImage(prompt); });
+
+    var copyBtn = document.createElement("button");
+    copyBtn.className = "mab";
+    copyBtn.textContent = "🔗 Copiar URL";
+    copyBtn.addEventListener("click", function() {
+      navigator.clipboard.writeText(imageUrl);
+      T("🔗 URL copiada al portapapeles");
+    });
+
+    btnRow.appendChild(dlBtn);
+    btnRow.appendChild(regenBtn);
+    btnRow.appendChild(copyBtn);
+
+    bubble.appendChild(caption);
+    bubble.appendChild(imgEl);
+    bubble.appendChild(btnRow);
+    wrapDiv.appendChild(bubble);
+
+    msgs.push({ role:"user", content:prompt });
+    msgs.push({ role:"assistant", content:"Imagen generada: " + desc });
+    document.getElementById("msgs").scrollTop = 99999;
+  };
+
+  imgEl.onerror = function() {
+    wrapDiv.innerHTML = "";
+    var bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerHTML = "⚠️ No se pudo generar la imagen. Probá con una descripción más simple, por ejemplo: <em>genera una imagen de un paisaje montañoso</em>";
+    wrapDiv.appendChild(bubble);
+    document.getElementById("msgs").scrollTop = 99999;
+  };
+
+  // Timeout fallback after 30 seconds
+  var timeout = setTimeout(function() {
+    if (!imgEl.complete || imgEl.naturalWidth === 0) {
+      imgEl.onerror();
+    }
+  }, 30000);
+
+  imgEl.onload = (function(origOnload) {
+    return function() {
+      clearTimeout(timeout);
+      origOnload.call(this);
+    };
+  })(imgEl.onload);
+
+  imgEl.src = imageUrl;
+}
+
+</script>
+</body>
+</html>
