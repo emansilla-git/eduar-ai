@@ -11,65 +11,80 @@ export default async function handler(req, res) {
   const apiKey = process.env.HF_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "HF_API_KEY no configurada en Vercel" });
 
-  try {
-    const { prompt } = req.body;
-    if (!prompt) return res.status(400).json({ error: "Prompt requerido" });
+  const { prompt } = req.body || {};
+  if (!prompt) return res.status(400).json({ error: "Prompt requerido" });
 
-    console.log("Generating image for prompt:", prompt.substring(0, 50));
+  // Models to try in order (all free on HF)
+  const models = [
+    "stabilityai/stable-diffusion-2-1",
+    "runwayml/stable-diffusion-v1-5",
+    "CompVis/stable-diffusion-v1-4"
+  ];
 
-    // Use flux-schnell which is free on Hugging Face
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + apiKey,
-          "Content-Type": "application/json",
-          "x-wait-for-model": "true"
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-        }),
-      }
-    );
+  let lastError = "";
 
-    console.log("HF response status:", response.status);
+  for (const model of models) {
+    try {
+      console.log("Trying model:", model, "prompt:", prompt.substring(0, 40));
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("HF error:", errText.substring(0, 300));
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55000); // 55s timeout
+
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/" + model,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + apiKey,
+            "Content-Type": "application/json",
+            "x-wait-for-model": "true"
+          },
+          body: JSON.stringify({ inputs: prompt }),
+          signal: controller.signal
+        }
+      );
+
+      clearTimeout(timeout);
+      console.log("Response status:", response.status, "from model:", model);
+
       if (response.status === 503) {
-        return res.status(503).json({ 
-          error: "El modelo está iniciando. Esperá 30 segundos e intentá de nuevo.",
-          retry: true
-        });
+        lastError = "Modelo cargando (" + model + ")";
+        continue; // try next model
       }
-      return res.status(response.status).json({ 
-        error: "Error de Hugging Face (status " + response.status + "): " + errText.substring(0, 150)
-      });
+
+      if (!response.ok) {
+        const txt = await response.text();
+        lastError = "Error " + response.status + " from " + model + ": " + txt.substring(0, 100);
+        console.error(lastError);
+        continue;
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      console.log("Content-Type:", contentType);
+
+      if (contentType.includes("application/json")) {
+        const json = await response.json();
+        lastError = "JSON response from " + model + ": " + JSON.stringify(json).substring(0, 100);
+        console.error(lastError);
+        continue;
+      }
+
+      // Success - binary image
+      const buffer = await response.arrayBuffer();
+      console.log("Success! Image size:", buffer.byteLength, "bytes from", model);
+
+      const base64 = Buffer.from(buffer).toString("base64");
+      const mime = contentType.includes("png") ? "image/png" : "image/jpeg";
+      return res.status(200).json({ url: "data:" + mime + ";base64," + base64 });
+
+    } catch (err) {
+      lastError = "Exception with " + model + ": " + err.message;
+      console.error(lastError);
     }
-
-    // Check content type
-    const contentType = response.headers.get("content-type") || "";
-    console.log("Content-Type:", contentType);
-
-    if (contentType.includes("application/json")) {
-      const jsonData = await response.json();
-      console.error("Unexpected JSON:", JSON.stringify(jsonData).substring(0, 200));
-      return res.status(500).json({ error: "Respuesta inesperada del modelo: " + JSON.stringify(jsonData).substring(0, 100) });
-    }
-
-    // Binary image response
-    const buffer = await response.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString("base64");
-    const mimeType = contentType.includes("png") ? "image/png" : "image/jpeg";
-    const dataUrl = "data:" + mimeType + ";base64," + base64;
-
-    console.log("Image generated successfully, size:", buffer.byteLength, "bytes");
-    return res.status(200).json({ url: dataUrl });
-
-  } catch (err) {
-    console.error("Internal error:", err.message);
-    return res.status(500).json({ error: "Error interno: " + err.message });
   }
+
+  // All models failed
+  return res.status(500).json({ 
+    error: "No se pudo generar la imagen. Último error: " + lastError
+  });
 }
